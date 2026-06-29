@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  
+  postgres:
+    image: postgres:16
+    container_name: salkim_postgres
+    environment:
+      POSTGRES_USER: salkim_user
+      POSTGRES_PASSWORD: salkim_password
+      POSTGRES_DB: salkim_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - salkim_network
+
+  
+  redis:
+    image: redis:7.2-alpine
+    container_name: salkim_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - salkim_network
+
+  
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile
+    container_name: salkim_api
+    command: uvicorn apps.api.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - salkim_network
+
+ 
+  celery_worker:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile
+    container_name: salkim_worker
+    command: celery -A apps.api.celery_worker.celery_app worker --loglevel=info -P threads
+    volumes:
+      - .:/app
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - salkim_network
+
+volumes:
+  postgres_data:
+
+networks:
+  salkim_network:
+    driver: bridge
+    
