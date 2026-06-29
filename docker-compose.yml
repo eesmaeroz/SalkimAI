@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # 1. Ana Veritabanı — TimescaleDB (PostgreSQL 16 + TimescaleDB uzantısı)
   # Doküman 2.5, 3.1: Sensör zaman serisi verileri için hypertable desteği zorunlu
@@ -12,7 +10,7 @@ services:
       POSTGRES_PASSWORD: salkim_password
       POSTGRES_DB: salkim_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
