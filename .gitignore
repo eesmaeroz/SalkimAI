@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+.venv/
+venv/
+
+# Machine Learning Weights (CRITICAL - GitHub 100MB limit)
+*.pth
+*.pt
+*.onnx
+*.tflite
+*.h5
+*.pb
+*.safetensors
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes (local)
+postgres_data/
+minio_data/
+
+# Byte-compiled
+*.pyc
+
+# Docs (binary - proje wikisinde tutulmalı)
+*.docx

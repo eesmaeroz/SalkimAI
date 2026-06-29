@@ -1,10 +1,12 @@
 version: '3.8'
 
 services:
-  
+  # 1. Ana Veritabanı — TimescaleDB (PostgreSQL 16 + TimescaleDB uzantısı)
+  # Doküman 2.5, 3.1: Sensör zaman serisi verileri için hypertable desteği zorunlu
   postgres:
-    image: postgres:16
+    image: timescale/timescaledb:latest-pg16
     container_name: salkim_postgres
+    restart: always
     environment:
       POSTGRES_USER: salkim_user
       POSTGRES_PASSWORD: salkim_password
@@ -15,58 +17,108 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - salkim_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U salkim_user -d salkim_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  
+  # 2. Asenkron Task Kuyruğu ve Cache
   redis:
     image: redis:7.2-alpine
     container_name: salkim_redis
+    restart: always
     ports:
       - "6379:6379"
     networks:
       - salkim_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
-  
+  # 3. Nesne Depolama — MinIO (S3-uyumlu)
+  # Doküman 3.1, 5.2: Ham görüntüler ve işlenmiş çıktılar MinIO/S3 üzerinde saklanacak
+  minio:
+    image: minio/minio:latest
+    container_name: salkim_minio
+    restart: always
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: salkim_admin
+      MINIO_ROOT_PASSWORD: salkim_password_minio
+    ports:
+      - "9000:9000"   # S3 API Portu
+      - "9001:9001"   # Web Yönetim Paneli
+    volumes:
+      - minio_data:/data
+    networks:
+      - salkim_network
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 4. FastAPI Ana Sunucu
   api:
     build:
       context: .
       dockerfile: infra/docker/Dockerfile
     container_name: salkim_api
+    restart: always
     command: uvicorn apps.api.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
     volumes:
       - .:/app
     environment:
+      - DATABASE_URL=postgresql://salkim_user:salkim_password@postgres:5432/salkim_db
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=salkim_admin
+      - MINIO_SECRET_KEY=salkim_password_minio
+      - JWT_SECRET_KEY=salkim_dev_insecure_secret_key_change_in_production_123456
     depends_on:
-      - redis
-      - postgres
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - salkim_network
 
- 
+  # 5. Celery Worker — Yapay zeka modellerini koşturan ağır işçi
+  # Volume ile .:/app bağlandığı için /app/ml/vision/models/ altındaki .pth dosyalarını okuyabilir
   celery_worker:
     build:
       context: .
       dockerfile: infra/docker/Dockerfile
     container_name: salkim_worker
+    restart: always
     command: celery -A apps.api.celery_worker.celery_app worker --loglevel=info -P threads
     volumes:
       - .:/app
     environment:
+      - DATABASE_URL=postgresql://salkim_user:salkim_password@postgres:5432/salkim_db
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=salkim_admin
+      - MINIO_SECRET_KEY=salkim_password_minio
     depends_on:
-      - redis
-      - postgres
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - salkim_network
 
 volumes:
   postgres_data:
+  minio_data:
 
 networks:
   salkim_network:
     driver: bridge
-    
