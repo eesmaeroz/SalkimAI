@@ -23,10 +23,15 @@ PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../.."))
 if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
 
+from prometheus_fastapi_instrumentator import Instrumentator
+
 from apps.api.database import create_tables
 from apps.api.services.storage import ensure_buckets
 from apps.api.routers.auth import router as auth_router
 from apps.api.routers.images import router as images_router
+from apps.api.routers.sensors import router as sensors_router
+from apps.api.routers.predictions import router as predictions_router
+from apps.api.routers.dashboard import router as dashboard_router
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +76,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# --- Prometheus Metrics ---
+Instrumentator().instrument(app).expose(app, tags=["metrics"])
+
 
 # --- CORS Ayarları ---
 # ÖNCEKİ (HATALI):
@@ -98,6 +106,9 @@ app.add_middleware(
 # --- Router'ları Bağla ---
 app.include_router(auth_router, prefix="/api/v1/auth")
 app.include_router(images_router, prefix="/api/v1/images")
+app.include_router(sensors_router, prefix="/api/v1/sensors")
+app.include_router(predictions_router, prefix="/api/v1/predictions")
+app.include_router(dashboard_router, prefix="/api/v1/greenhouses")
 
 
 # --- Health Check (Korumasız — Monitoring için) ---

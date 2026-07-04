@@ -113,9 +113,38 @@ services:
     networks:
       - salkim_network
 
+  # 6. Prometheus — Metrik Toplama (Gün 19-20 Görevi)
+  prometheus:
+    image: prom/prometheus:v2.50.0
+    container_name: salkim_prometheus
+    restart: always
+    volumes:
+      - ./infra/docker/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - salkim_network
+
+  # 7. Grafana — Metrik Görselleştirme (Gün 19-20 Görevi)
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: salkim_grafana
+    restart: always
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=salkim_admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - salkim_network
+
 volumes:
   postgres_data:
   minio_data:
+  prometheus_data:
+  grafana_data:
 
 networks:
   salkim_network:

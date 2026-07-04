@@ -18,6 +18,7 @@ YENİ AKIŞ (Doğru):
 import os
 import sys
 import logging
+import time
 from datetime import datetime, timezone
 
 from celery import Celery
@@ -38,6 +39,11 @@ from apps.api.services.storage import (
     ensure_buckets,
     BUCKET_RAW_IMAGES,
 )
+from apps.api.services.metrics import (
+    CELERY_TASK_DURATION,
+    CELERY_TASK_FAILURES,
+    DISEASE_RISK_DETECTIONS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -56,8 +62,8 @@ celery_app.conf.update(
     result_serializer="json",
     accept_content=["json"],
     result_expires=86400,  # Redis result 1 gün (artık sadece yedek, asıl veri DB'de)
+    worker_hijack_root_logger=False,
 )
-
 
 @celery_app.task(name="tasks.run_full_analysis", bind=True, max_retries=2)
 def run_full_analysis_task(self, image_id: str, image_path: str, original_filename: str):
@@ -70,7 +76,8 @@ def run_full_analysis_task(self, image_id: str, image_path: str, original_filena
         original_filename: Orijinal dosya adı
     """
     db: Session = SessionLocal()
-
+    start_time = time.time()
+    
     try:
         # 0. MinIO bucket'larını garanti et
         ensure_buckets()
@@ -114,6 +121,14 @@ def run_full_analysis_task(self, image_id: str, image_path: str, original_filena
             disease_map = {0: "healthy", 1: "early_blight", 2: "late_blight", 3: "pest", 4: "mosaic"}
             analysis_record.disease_class = disease_map.get(dominant_disease, f"class_{dominant_disease}")
             analysis_record.disease_prob = disease_classes.count(dominant_disease) / len(disease_classes)
+            
+            # Prometheus metrik güncelle
+            risk_level = "low"
+            if analysis_record.disease_prob > 0.70:
+                risk_level = "high"
+            elif analysis_record.disease_prob > 0.40:
+                risk_level = "medium"
+            DISEASE_RISK_DETECTIONS.labels(risk_level=risk_level, disease_class=analysis_record.disease_class).inc()
 
         db.add(analysis_record)
 
@@ -143,6 +158,7 @@ def run_full_analysis_task(self, image_id: str, image_path: str, original_filena
 
     except Exception as exc:
         logger.error(f"[CELERY] Görev hatası: {exc}", exc_info=True)
+        CELERY_TASK_FAILURES.labels(task_name="run_full_analysis", error_type=type(exc).__name__).inc()
 
         # Hata durumunda image status'u güncelle
         try:
@@ -161,3 +177,5 @@ def run_full_analysis_task(self, image_id: str, image_path: str, original_filena
 
     finally:
         db.close()
+        duration = time.time() - start_time
+        CELERY_TASK_DURATION.labels(task_name="run_full_analysis").observe(duration)

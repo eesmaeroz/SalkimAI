@@ -1,0 +1,536 @@
+🌿 SALKIM
+Yazılım Mimarisi & Geliştirme Planı
+YAZILIM DOKÜMANTASYONU  •  3 FAZ  •  4 KİŞİLİK EKİP  •  30 GÜN
+
+Versiyon 1.0   |   Haziran 2025
+
+1. EKİP YAPISI VE SORUMLULUKLAR
+Salkım geliştirme ekibi 4 kişiden oluşmakta olup 2 alt birime ayrılmaktadır. Her alt birim temel sorumluluklarına ek olarak paylaşılan görevleri (altyapı, test, dokümantasyon) eşit ağırlıkta üstlenir.
+
+Üye
+Rol
+Takım
+Temel Sorumluluk
+Paylaşılan Görevler
+V1
+Görüntü İşleme Lead
+Görüntü İşleme
+YOLOv8 model geliştirme, veri pipeline
+CI/CD kurulumu, API entegrasyon testi
+V2
+CV & Backend Eng.
+Görüntü İşleme
+EfficientNet fine-tune, FastAPI endpoint
+Mobil görüntü entegrasyonu, DB şema
+T1
+ML / Tahminleme Lead
+Tahminleme
+XGBoost/LSTM model, MLflow
+Hava API entegrasyonu, model monitoring
+T2
+Backend & Data Eng.
+Tahminleme
+Celery/Redis kuyruk, TimescaleDB
+Deployment altyapısı, kullanıcı onboarding
+
+2. YAZILIM MİMARİSİ
+2.1 Genel Mimari Yaklaşım
+Salkım, aşağıdaki temel mimari prensipleri benimser:
+	•	Separation of Concerns: Görüntü işleme, tahminleme ve API katmanları bağımsız servisler olarak deploy edilir
+	•	Async-first: Tüm ağır hesaplamalar (model inference, eğitim) Celery worker'lara devredilir
+	•	Offline-capable: Mobil uygulama internet bağlantısı olmadan temel görüntü kalite kontrolü yapabilir
+	•	Reproducibility: Tüm model deneyleri MLflow ile izlenir, tekrar üretilebilir
+
+2.2 Servis Haritası
+Servis
+Teknoloji
+Port/Endpoint
+Ölçekleme
+Mobile App
+Flutter 3.x
+N/A (istemci)
+Kullanıcı cihazı
+API Gateway
+FastAPI + Uvicorn
+:8000 /api/v1/
+Horizontal (k8s replica)
+Vision Service
+FastAPI + TorchServe
+:8001 /infer/
+GPU node ayrımı
+Prediction Service
+FastAPI + MLflow
+:8002 /predict/
+CPU cluster
+Task Queue
+Celery + Redis
+Redis :6379
+Worker pod sayısı
+Database
+PostgreSQL 16 + TimescaleDB
+:5432
+Read replica
+Object Storage
+MinIO (S3-compat.)
+:9000
+Distributed mode
+Monitoring
+Prometheus + Grafana
+:9090 / :3000
+Tek pod
+
+2.3 Klasör Yapısı — Monorepo
+salkım/
+├── apps/
+│   ├── mobile/              # Flutter uygulaması
+│   │   ├── lib/
+│   │   │   ├── core/        # DI, routing, theme
+│   │   │   ├── features/    # capture, dashboard, alerts
+│   │   │   └── shared/      # widgets, utils
+│   │   └── assets/models/   # TFLite on-device model
+│   └── api/                 # FastAPI ana servis
+│       ├── routers/         # endpoints: images, predictions, users
+│       ├── services/        # iş mantığı katmanı
+│       ├── models/          # SQLAlchemy ORM modelleri
+│       └── workers/         # Celery task tanımları
+├── ml/
+│   ├── vision/              # YOLOv8 + EfficientNet
+│   │   ├── data/            # veri ön-işleme script'leri
+│   │   ├── train/           # eğitim pipeline'ı
+│   │   └── inference/       # TorchServe handler
+│   └── prediction/          # XGBoost + LSTM
+│       ├── features/        # feature engineering
+│       ├── train/           # model eğitimi
+│       └── serve/           # model servis
+├── infra/
+│   ├── docker/              # Dockerfile'lar
+│   ├── k8s/                 # Kubernetes manifest'leri
+│   └── terraform/           # IaC (opsiyonel)
+├── tests/                   # unit + integration + e2e
+└── docs/                    # bu dokümantasyon
+
+2.4 API Tasarımı — Temel Endpoint'ler
+Method
+Endpoint
+Açıklama
+Ekip
+POST
+/api/v1/images/upload
+Görüntü yükle, analiz kuyruğuna ekle
+V2
+GET
+/api/v1/images/{id}/result
+Analiz sonucunu getir (async polling)
+V2
+POST
+/api/v1/predictions/harvest
+Hasat tarihi tahmini iste
+T1
+GET
+/api/v1/predictions/dashboard/{greenhouse_id}
+Sera özet dashboard verisi
+T2
+POST
+/api/v1/auth/register
+Kullanıcı kaydı
+T2
+POST
+/api/v1/auth/token
+JWT token al
+T2
+GET
+/api/v1/greenhouses/{id}/history
+Geçmiş analiz listesi
+V2
+POST
+/api/v1/feedback
+Kullanıcı geri bildirimi (model iyileştirme)
+T1
+
+2.5 Veritabanı Şeması — ERD Özeti
+users (id PK, phone, name, role, subscription_tier, created_at)
+   └── greenhouses (id PK, user_id FK, name, area_m2, variety, location_lat, location_lng)
+         └── plants (id PK, greenhouse_id FK, row_num, planted_at)
+               └── images (id PK, plant_id FK, url, captured_at, quality_score)
+                     └── analyses (id PK, image_id FK UNIQUE, maturity_class, maturity_score,
+                                   disease_class, disease_prob, processed_at, model_version)
+         └── harvests (id PK, greenhouse_id FK, harvested_at, weight_kg, quality_grade)
+sensor_readings (time TIMESTAMPTZ, greenhouse_id FK, temp_c, humidity_pct, lux)
+  -- TimescaleDB hypertable: partition by time (1 month chunks)
+
+2.6 Görüntü İşleme Pipeline Detayı
+Görüntü analizi şu aşamalardan geçer (Celery worker üzerinde asenkron):
+	•	Kalite Kontrolü: Laplacian varyans < 100 → hata dön, değilse devam et
+	•	Ön İşleme: CLAHE + HSV dönüşüm + resize (640×640 YOLOv8, 380×380 EfficientNet)
+	•	Deteksiyon: YOLOv8-m → domates bounding box'ları + confidence score'ları
+	•	Kırpma & Batch: Her tespit edilen domates için patch kırpılır, batch oluşturulur
+	•	Sınıflandırma: EfficientNet-B4 → her patch için (maturity_class, disease_class, olasılıklar)
+	•	Agregasyon: Tüm patch sonuçları ağırlıklı ortalama ile birleştirilir
+	•	Depolama: Sonuç PostgreSQL analyses tablosuna, ham görüntü MinIO'ya yazılır
+	•	Bildirim: Hastalık riski > 0.7 ise FCM push bildirimi tetiklenir
+
+2.7 Model Versiyonlama Stratejisi
+	•	Tüm model eğitimleri MLflow Tracking Server'a loglanır (metrics, params, artifacts)
+	•	Staging → Production geçişi: test set F1 iyileşmesi + A/B testi onayı gerektirir
+	•	Canary deploy: yeni model tüm trafiğin %10'una uygulanır, 48 saat izlenir
+	•	Model versiyonu her analiz sonucuyla birlikte saklanır (geriye dönük debugging için)
+	•	On-device TFLite modeli: major sürüm değişikliğinde uygulama güncellemesiyle dağıtılır
+
+
+3. 1 AYLIK TAMAMLAMA PLANI
+Toplam süre 30 takvim günüdür. Plan üç fazdan oluşur; her faz bir öncekinin çıktıları üzerine inşa edilir. Sprint metodolojisi yerine milestone-bazlı akış kullanılmaktadır; bu sayede 4 kişilik ekip koordinasyon yüküyle boğulmadan hızlı ilerleme sağlar.
+
+Renk Kodu
+Mavi satır: Görüntü İşleme Ekibi (V1, V2)
+Yeşil satır: Tahminleme Ekibi (T1, T2)
+
+FAZ 1
+Temel Altyapı & Veri Hazırlığı
+Gün 1–8
+
+Hedef: Tüm servislerin çalışır hale gelmesi, veri pipeline'ının kurulması ve ilk ham model eğitiminin tamamlanması.
+
+Genel Görevler (Her İki Ekip — Eşit Dağılım)
+Gün
+Görev
+Sorumlu
+Çıktı
+1–2
+Monorepo yapısı kurulumu, Git branching stratejisi (main/develop/feature/*)
+V1 + T2
+Boş repo, CI pipeline taslağı
+1–2
+Docker Compose: PostgreSQL, Redis, MinIO, TimescaleDB ayağa kaldırma
+T2 + V2
+docker-compose.yml çalışır
+3
+FastAPI iskelet: auth router, image router, health endpoint
+V2
+/api/v1/ temel yapı
+3
+SQLAlchemy modelleri + Alembic migration ilk versiyon
+T2
+DB şeması oluştu
+4–5
+Görüntü veri seti toplama protokolü: annotation guidelines, LabelImg kurulumu
+V1
+İlk 500 annotated görüntü
+4–5
+MLflow + DVC kurulumu, örnek eğitim deney kaydı
+T1
+Deney takip altyapısı
+6–7
+YOLOv8-n ile ilk domates tespiti deneysel eğitimi (küçük veri seti)
+V1 + V2
+Baseline mAP skoru
+6–7
+Feature engineering modülü: GDD hesaplayıcı, hava API mock'u
+T1 + T2
+Feature pipeline prototipi
+8
+Celery + Redis entegrasyonu: görüntü işleme task şablonu
+T2
+Async task çalışıyor
+8
+Faz 1 entegrasyon testi: görüntü yükle → task kuyruğu → log
+V2
+E2E pipeline doğrulandı
+
+Faz 1 Teslim Kriterleri:
+	•	Docker Compose ile tüm servisler ayağa kalkıyor
+	•	Görüntü yükleme → Celery kuyruğu akışı uçtan uca çalışıyor
+	•	YOLOv8 baseline modeli eğitilmiş, MLflow'a kaydedilmiş
+	•	İlk veri seti: minimum 500 annotated domates görüntüsü
+
+FAZ 2
+Model Geliştirme & API Olgunlaştırma
+Gün 9–22
+
+Hedef: Görüntü işleme ve tahminleme modellerinin prodüksiyona yakın doğrulukta çalışması; API'nin tüm temel endpoint'lerinin tamamlanması.
+
+Görüntü İşleme Ekibi (V1, V2)
+Gün
+Görev
+Sorumlu
+Çıktı
+9–11
+Veri seti genişletme: 2.000 görüntüye çıkma, augmentation (flip, renk jitter, blur)
+V1
+2.000 görüntü, Roboflow seti
+9–11
+EfficientNet-B4 transfer learning: olgunluk 5 sınıf, ilk eğitim turu
+V2
+Baseline accuracy ~ %75
+12–14
+YOLOv8-m yükseltme: büyük veri setiyle yeniden eğitim, hiperparametre araması
+V1
+mAP@0.5 > 0.72
+12–14
+EfficientNet ince ayar: son 3 blok unfreeze, learning rate scheduling
+V2
+Accuracy > %85
+15–17
+Hastalık sınıflandırıcı: EfficientNet fine-tune hastalık etiketleriyle
+V1 + V2
+Disease F1 > 0.80
+18–20
+TorchServe kurulumu, model handler yazımı, gRPC + REST expose
+V2
+Vision Service :8001
+21–22
+On-device TFLite modeli: YOLOv8 + EfficientNet quantize, Flutter entegrasyonu
+V1
+TFLite çalışıyor offline
+
+Tahminleme Ekibi (T1, T2)
+Gün
+Görev
+Sorumlu
+Çıktı
+9–11
+OpenWeatherMap API gerçek entegrasyonu, GDD hesaplayıcı productionize
+T1
+Hava modülü çalışıyor
+9–11
+PostgreSQL JWT auth tam implementasyonu, refresh token rotasyonu
+T2
+Auth sistemi prod-ready
+12–14
+XGBoost hasat tarihi modeli: sentetik + gerçek veriyle ilk eğitim
+T1
+RMSE < 4 gün
+12–14
+TimescaleDB sensör okuma pipeline'ı, continuous aggregate view'lar
+T2
+Sensör API endpoint
+15–17
+LSTM zaman serisi modeli: olgunluk trendi, 48 timestep lookback
+T1
+Validation loss yakınsama
+15–17
+Tahminleme servis API: /predict/harvest, /predict/disease_risk endpoint
+T2
+Prediction Service :8002
+18–20
+Ensemble birleştirme: XGBoost + LSTM ağırlıklı average, calibration
+T1
+Final RMSE < 2.5 gün
+21–22
+FCM push bildirim servisi: hastalık uyarısı, hasat zamanı bildirimi
+T2
+Bildirim gönderiliyor
+
+Paylaşılan Görevler — Faz 2
+Gün
+Görev
+Sorumlu
+Çıktı
+13–14
+API entegrasyon testleri: görüntü yükleme → analiz sonucu tam akış
+V2 + T2
+pytest suite geçiyor
+19–20
+Prometheus metrik ekleme: API latency, model inference süresi, hata oranı
+T2 + V2
+Grafana dashboard
+22
+Faz 2 kod incelemesi: her ekip diğerinin kodunu inceler, PR birleştirme
+Tüm ekip
+develop branch merge
+
+Faz 2 Teslim Kriterleri:
+	•	Olgunluk sınıflandırması: test seti üzerinde %87+ doğruluk
+	•	Hasat tarihi tahmini: RMSE ≤ 2.5 gün
+	•	Tüm temel API endpoint'leri çalışır ve testli
+	•	TFLite modeli Flutter uygulamasında offline çalışıyor
+
+FAZ 3
+Entegrasyon, Test & Yayın Hazırlığı
+Gün 23–30
+
+Hedef: Uçtan uca ürünün beta kalitesine ulaşması, pilot üreticilerle gerçek ortam testinin yapılması ve yayın altyapısının hazırlanması.
+
+Gün
+Görev
+Sorumlu
+Çıktı
+23–24
+Flutter UI: görüntü çekme → yükleme → sonuç ekranı tam akış
+V1
+Mobil demo çalışıyor
+23–24
+Dashboard ekranı: sera özeti, hasat takvimi, uyarılar
+T1 + T2
+Flutter dashboard
+25
+Görüntü pipeline yük testi: 50 eşzamanlı istek, <3s yanıt süresi doğrulama
+V2
+Performans raporu
+25
+Kubernetes manifest'leri: deployment, service, HPA konfigürasyonu
+T2
+k8s prod ortam taslağı
+26
+Güvenlik taraması: dependency audit, SQL injection, rate limiting
+V1 + V2
+Güvenlik raporu
+26
+KVKK uyumluluk kontrolü: veri erişim logları, silme endpoint'i
+T1 + T2
+Uyumluluk checklist
+27–28
+3 pilot sera ile beta testi: gerçek domates fotoğrafları, geri bildirim toplama
+V1 + T1
+Beta test raporu
+27–28
+Model performans kalibrasyonu: beta geri bildirimine göre threshold ayarı
+T1
+Güncel model artifact
+29
+App Store / Google Play store listing hazırlığı, ekran görüntüleri
+V2
+Mağaza varlıkları
+29
+API dokümantasyonu: OpenAPI/Swagger otomatik + README güncelleme
+T2
+docs.salkım.app
+30
+Son entegrasyon testi, staging → prod deploy, Go/No-Go toplantısı
+Tüm ekip
+Ürün yayın onayı
+
+Faz 3 Teslim Kriterleri:
+	•	Uçtan uca akış: fotoğraf çek → analiz al → hasat tahmini gör (mobilde < 5 saniye)
+	•	3 pilot sera pozitif geri bildirimi (Likert ≥ 4/5)
+	•	Yük testi: 50 eşzamanlı kullanıcı, p95 yanıt < 3 saniye
+	•	App Store / Google Play mağaza sayfası hazır
+	•	Prod deploy çalışıyor, Grafana monitoring aktif
+
+4. ÖZET TAKVİM VE YÜKLEME DAĞILIMI
+Faz
+Gün Aralığı
+V1 Odağı
+V2 Odağı
+T1 Odağı
+T2 Odağı
+Faz 1
+1–8
+YOLOv8 baseline, veri seti
+FastAPI + DB şema
+MLflow + feature eng.
+Celery + Docker
+Faz 2
+9–22
+Model iyileştirme, TFLite
+TorchServe, testler
+XGBoost + LSTM
+Prediction API, FCM
+Faz 3
+23–30
+Mobil UI, mağaza
+Yük testi, güvenlik
+Beta kalibrasyon
+k8s, KVKK, docs
+
+4.1 İş Yükü Dengesi
+Her ekip üyesinin aylık toplam iş yükü yaklaşık eşit tutulmuştur:
+Üye
+Core Görevler (gün-eşdeğer)
+Paylaşılan Görevler (gün-eşdeğer)
+Toplam
+V1
+18 gün
+7 gün
+~25 gün etkin çalışma
+V2
+17 gün
+8 gün
+~25 gün etkin çalışma
+T1
+18 gün
+7 gün
+~25 gün etkin çalışma
+T2
+17 gün
+8 gün
+~25 gün etkin çalışma
+
+5. GELİŞTİRME STANDARTLARI VE KONVANSİYONLAR
+5.1 Git İş Akışı
+	•	Branch: feature/[ekip]-[kısa-açıklama]  —  örn. feature/vision-yolov8-training
+	•	Commit mesajı: [type]([scope]): [kısa açıklama]  —  örn. feat(vision): add EfficientNet handler
+	•	PR: en az 1 diğer üye onayı, CI tüm testler geçmeli
+	•	Faz sonunda develop → main merge, tag: v0.1.0 / v0.2.0 / v1.0.0-beta
+
+5.2 Test Stratejisi
+Test Türü
+Kapsam
+Araç
+Sorumluluk
+Unit Test
+Model fonksiyonları, feature hesaplayıcılar
+pytest
+Her üye kendi kodu
+Integration Test
+API endpoint → DB → Celery akışı
+pytest + httpx
+V2 + T2
+Model Eval
+Accuracy, F1, RMSE benchmark'ları
+MLflow + sklearn
+V1 + T1
+Load Test
+50 eşzamanlı kullanıcı, Faz 3
+Locust
+V2 + T2
+E2E Test
+Mobil → API → Sonuç tam akış
+Flutter integration test
+V1 + T1
+
+5.3 Günlük Senkronizasyon
+	•	Günlük async stand-up: Slack thread (ne yaptım / ne yapacağım / engel)
+	•	Haftalık senkron toplantı: Her Pazartesi 30 dk video çağrı, faz ilerleme kontrolü
+	•	Engel bildirimi: herhangi bir üye >4 saatlik bloklama yaşarsa hemen ekiple paylaşır
+	•	Faz geçişi toplantısı: Gün 8, Gün 22, Gün 30 — çıktı kabul ve sonraki faz kilitlenmesi
+
+5.4 Ortam Yönetimi
+	•	Local: Docker Compose (her geliştirici kendi makinesinde tam stack)
+	•	Staging: tek VM (4 vCPU, 16 GB RAM, 1 GPU) — Faz 2'den itibaren aktif
+	•	Prod: Kubernetes cluster (Faz 3 deploy) — başlangıçta 3 node (2 CPU + 1 GPU node)
+	•	Sırlar: .env + Doppler veya Vault (prod için) — repo'ya asla commit edilmez
+
+6. BAĞIMLILIKLAR VE GELİŞTİRME RİSKLERİ
+Risk
+Etki
+Azaltma
+Sahibi
+Yeterli domates veri seti bulunamaz
+Yüksek — model doğruluğu
+Faz 1'de üniversite ziraat bölümü veri işbirliği başlat
+V1
+Hava API kota aşımı
+Orta — tahmin modeli
+Meteomatics yedek sağlayıcı API key hazır tut
+T1
+GPU erişim gecikmesi
+Orta — eğitim süresi
+Colab Pro yedek, Faz 2 start'ı erken planla
+V1 + T1
+Flutter iOS/Android derleme sorunları
+Düşük — yayın gecikmesi
+Faz 3 başında mock API ile mobil geliştirmeyi erkene al
+T2
+Model inference > 3s
+Yüksek — kullanıcı deneyimi
+Batch inference, model quantization, önbellek katmanı
+V2
+
+7. SONUÇ VE SONRAKİ ADIMLAR
+Bu plan, Salkım platformunun 30 gün içinde beta kalitesine ulaşması için gereken tüm teknik altyapı, model geliştirme ve entegrasyon adımlarını kapsamaktadır. Planda öne çıkan üç kritik başarı faktörü:
+
+	•	Erken veri toplama: Faz 1'deki görüntü toplama hızı, model kalitesini doğrudan belirler. V1 bu kritik yolda hız kazanmak için Faz 1'in tamamına odaklanmalıdır.
+	•	Paralel geliştirme: Görüntü işleme ve tahminleme servisleri bağımsız konteynerlar olduğundan Faz 2'de iki ekip çakışmasız ilerleyebilir.
+	•	Erken beta testi: Faz 3'ün ilk yarısında gerçek üreticilerle test, son düzeltmeler için 3-4 gün tampon sağlar.
+
+Faz 3 tamamlandığında ürün; uygulama mağaza yayını, ücretli abonelik altyapısı ve izleme sistemi ile birlikte tam işlevsel bir MVP olarak kullanıcılara sunulmaya hazır olacaktır.
