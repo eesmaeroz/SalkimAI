@@ -10,7 +10,7 @@
 - Roboflow'dan 542 fotoğraflık dataset indirildi
 - YOLOv8 olgunluk modeli eğitildi (mAP: 0.966)
 - full_analysis() pipeline'ı birleştirildi
-- Tüm modeller Drive'a kaydedildi
+- Tüm modeller Google Drive'a kaydedildi
 
 **Bir sonraki sprintte yapacaklarım:**
 - TFLite export — mobil için model küçültme
@@ -21,7 +21,7 @@
 
 ---
 
-### V2 — CV & Backend Engineer
+### V2 (Dilan) — CV & Backend Engineer
 **Yaptıklarım:**
 - EfficientNet eğitim altyapısı kuruldu
 - Backend mimarisi hazırlandı
@@ -34,32 +34,39 @@
 **Engel var mı:**
 - Yok
 
----------------------------------------------------------------
+---
 
-### T1 — ML/Tahminleme Lead
+### T1 (Arif) — ML/Tahminleme Lead
 **Yaptıklarım:**
-- Henüz başlanmadı
+- MLflow + DVC kurulumu tamamlandı
+- Feature engineering modülü yazıldı
+- GDD hesaplayıcı tamamlandı
+- Hava API mock'u hazırlandı
+- XGBoost/LSTM model prototipi oluşturuldu
 
 **Bir sonraki sprintte yapacaklarım:**
-- OpenWeatherMap API entegrasyonu
-- GDD hesaplayıcı
-- XGBoost hasat tahmini modeli
+- OpenWeatherMap API gerçek entegrasyonu
+- XGBoost hasat tahmini modeli eğitimi
 
 **Engel var mı:**
 - Yok
 
 ---
 
-### T2 — Backend & Data Engineer
+### T2 (Eren) — Backend & Data Engineer
 **Yaptıklarım:**
 - Docker Compose kuruldu (PostgreSQL, Redis, FastAPI, Celery)
-- FastAPI endpoint'leri hazırlandı (görsel yükleme + sonuç sorgulama)
-- YOLOv8, olgunluk ve hastalık modelleri Docker'a entegre edildi
-- E2E entegrasyon testi yapıldı — fotoğraf → Redis → Celery → JSON sonuç
+- FastAPI endpoint'leri hazırlandı
+- 3 model Docker'a entegre edildi
+- E2E entegrasyon testi tamamlandı
+- Kubernetes API deployment tamamlandı
+- Redis deployment tamamlandı
+- Celery worker entegrasyonu sağlandı
+- Secrets.yaml oluşturuldu
 
 **Bir sonraki sprintte yapacaklarım:**
-- Kubernetes manifest'leri
 - FCM push bildirim servisi
+- TimescaleDB sensör pipeline'ı
 
 **Engel var mı:**
 - Yok
