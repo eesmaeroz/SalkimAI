@@ -1,6 +1,6 @@
 # Sprint 1 Review — Salkım Projesi
 
-**Tarih:** 4 Temmuz 2026  
+**Tarih:** 5 Temmuz 2026  
 **Sprint Süresi:** 1 Hafta  
 **Katılımcılar:** V1 (Esma), V2 (Dilan), T1 (Arif), T2 (Eren)
 
@@ -21,6 +21,15 @@
 - FastAPI endpoint'leri hazırlandı
 - 3 model Docker'a entegre edildi
 - E2E entegrasyon testi tamamlandı
+- Kubernetes API, Redis ve Worker deployment'ları tamamlandı
+- Secrets.yaml oluşturuldu
+
+### ML/Tahminleme (Arif - T1)
+- MLflow + DVC kurulumu tamamlandı
+- Feature engineering modülü yazıldı
+- GDD hesaplayıcı tamamlandı
+- Hava API mock'u hazırlandı
+- XGBoost/LSTM model prototipi oluşturuldu
 
 ### CV & Backend (Dilan - V2)
 - EfficientNet eğitim altyapısı kuruldu
@@ -29,11 +38,12 @@
 ---
 
 ## Tamamlanamayan İşler
-- T1 (Arif): Tahminleme modeli — Sprint 2'ye taşındı
 - TFLite export — Sprint 2'ye taşındı
 - FCM push bildirim — Sprint 2'ye taşındı
+- EfficientNet fine-tune (Roboflow) — Sprint 2'ye taşındı
+- OpenWeatherMap gerçek entegrasyonu — Sprint 2'ye taşındı
 
 ---
 
 ## Sprint Hedefi Değerlendirmesi
-Görüntü işleme pipeline'ı ve backend altyapısı başarıyla tamamlandı. Model doğrulukları hedef değerlerin üzerinde çıktı.
+Sprint 1 başarıyla tamamlandı. Görüntü işleme pipeline'ı, backend altyapısı ve tahminleme modeli prototipi hazır. Model doğrulukları hedef değerlerin üzerinde çıktı.
