@@ -1,33 +1,37 @@
 # Sprint 1 Retrospective — Salkım Projesi
 
-**Tarih:** 4 Temmuz 2026  
+**Tarih:** 5 Temmuz 2026  
 **Katılımcılar:** V1 (Esma), V2 (Dilan), T1 (Arif), T2 (Eren)
 
 ---
 
-## İyi Gidenler 👍
+## İyi Gidenler 
 - Görüntü işleme pipeline'ı hedefin üzerinde tamamlandı
 - Model doğrulukları beklentilerin üzerinde çıktı (mAP 0.966, %99.5 accuracy)
 - Backend ve görüntü işleme ekipleri paralel ilerledi
-- T2 Docker altyapısını hızlıca kurdu, E2E test tamamlandı
+- T2 Docker ve Kubernetes altyapısını hızlıca kurdu
+- T1 tahminleme altyapısını tamamladı
+- E2E entegrasyon testi başarıyla geçildi
 - Ekip içi iletişim sağlıklı yürütüldü
 
 ---
 
-## Geliştirilmesi Gerekenler 👎
-- T1 tahminleme modeli başlayamadı, Sprint 2'ye taşındı
+## Geliştirilmesi Gerekenler 
 - TFLite export tamamlanamadı
+- EfficientNet fine-tune Sprint 2'ye kaldı
 - Veri seti bulma sürecinde zaman kaybedildi
+- OpenWeatherMap gerçek entegrasyonu yapılamadı
 
 ---
 
-## Aksiyon Maddeleri 🎯
-- Sprint 2'de T1 tahminleme modeline öncelik verilecek
-- TFLite export Sprint 2 başında tamamlanacak
+## Aksiyon Maddeleri 
+- Sprint 2'de TFLite export öncelikli yapılacak
 - V2 EfficientNet fine-tune'u Roboflow dataseti ile tamamlayacak
+- T1 OpenWeatherMap gerçek entegrasyonunu yapacak
 - FCM push bildirim sistemi kurulacak
+- TimescaleDB sensör pipeline'ı oluşturulacak
 
 ---
 
 ## Genel Değerlendirme
-Sprint 1 genel olarak başarılı tamamlandı. Görüntü işleme ve backend altyapısı hazır, Sprint 2'de tahminleme ve mobil entegrasyon odaklanılacak.
+Sprint 1 genel olarak başarılı tamamlandı. Tüm ekip üyeleri Faz 1 görevlerini tamamladı. Sprint 2'de mobil entegrasyon ve tahminleme modeli odak noktası olacak.
