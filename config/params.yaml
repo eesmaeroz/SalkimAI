@@ -7,13 +7,22 @@ paths:
   predictions_output: reports/predictions.csv
 
 mlflow:
-  tracking_uri: mlruns
+  tracking_uri: sqlite:///C:/salkim_ai/mlflow.db
+  artifact_location: file:///C:/salkim_ai/mlruns
   experiment_name: salkim_yield_prediction
   run_name: random_forest_baseline
 
 feature_engineering:
   tomato_base_temperature_C: 10
   use_mock_weather_when_missing: true
+
+weather:
+  api_url: https://api.open-meteo.com/v1/forecast
+  latitude: 40.8991
+  longitude: 31.1888
+  cache_expire_seconds: 3600
+  retries: 5
+  backoff_factor: 0.2
 
 training:
   target_column: yield_kg_per_m2

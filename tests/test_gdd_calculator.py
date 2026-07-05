@@ -2,6 +2,7 @@ from ml.prediction.features.gdd_calculator import (
     calculate_gdd,
     calculate_cumulative_gdd,
 )
+from ml.prediction.features.weather_api_mock import get_mock_weather_data
 
 
 def test_calculate_gdd_positive():
@@ -32,3 +33,18 @@ def test_calculate_cumulative_gdd():
     )
 
     assert result == 30
+
+
+def test_calculate_gdd_rejects_inverted_range():
+    try:
+        calculate_gdd(min_temp_c=30, max_temp_c=18)
+    except ValueError as error:
+        assert "Minimum temperature" in str(error)
+    else:
+        raise AssertionError("Expected an inverted temperature range to fail")
+
+
+def test_weather_mock_is_deterministic():
+    first = get_mock_weather_data("GH_001", days=2)
+    second = get_mock_weather_data("GH_001", days=2)
+    assert first == second

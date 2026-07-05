@@ -1,42 +1,19 @@
-# Salkım AI
-# Salkım T1 - MLflow + DVC + Feature Engineering Altyapısı
+# Salkım AI — MLflow, DVC ve Feature Engineering
 
-Bu proje, sera domates verimi tahmini için T1 tahminleme modülünün MLOps altyapısını hazırlar.
+Sera domates verimi tahmini için tekrarlanabilir bir MLOps örneğidir.
 
-## Amaç
+## İçerik
 
-Bu sistemde amaç, sera verilerinden `yield_kg_per_m2` değerini tahmin etmektir.
+- DVC pipeline: örnek veri üretimi, feature engineering ve model eğitimi
+- MLflow: Random Forest parametreleri, MAE/RMSE/R² metrikleri ve model artifact'i
+- GDD (Growing Degree Days) hesaplama
+- İnternet gerektirmeyen deterministik hava durumu mock'u
+- Open-Meteo canlı istemcisi: önbellek ve otomatik yeniden deneme
 
-## Kullanılan yapılar
+Canlı hava istemcisi Düzce koordinatlarını (`40.8991, 31.1888`) kullanır ve
+mevcut sıcaklık/nem, saatlik sıcaklık ve günlük min–maks sıcaklık/hava kodunu
+getirir. Eğitim pipeline'ı tekrarlanabilirlik için varsayılan olarak mock veriyi
+kullanır.
 
-- DVC ile veri ve pipeline versiyonlama
-- MLflow ile deney takibi
-- GDD hesaplama
-- Hava API mock modülü
-- Feature engineering
-- Random Forest Regressor modeli
-- MAE, RMSE, R² değerlendirme metrikleri
-
-## Klasör yapısı
-
-```text
-salkim_mlops_project/
-│
-├── config/
-│   └── params.yaml
-│
-├── data/
-│   ├── raw/
-│   └── processed/
-│
-├── ml/
-│   └── prediction/
-│       ├── features/
-│       ├── training/
-│       └── inference/
-│
-├── scripts/
-├── tests/
-├── dvc.yaml
-├── requirements.txt
-└── README.md
+Kurulum ve çalıştırma adımları için [RUN_COMMANDS.md](RUN_COMMANDS.md) dosyasına
+bakın.

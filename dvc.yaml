@@ -1,4 +1,11 @@
 stages:
+  create_sample_data:
+    cmd: python scripts/create_sample_data.py
+    deps:
+      - scripts/create_sample_data.py
+    outs:
+      - data/raw/greenhouse_data.csv
+
   make_features:
     cmd: python -m ml.prediction.features.feature_engineering
     deps:
@@ -12,6 +19,9 @@ stages:
     metrics:
       - reports/feature_report.json:
           cache: false
+    params:
+      - feature_engineering.tomato_base_temperature_C
+      - feature_engineering.use_mock_weather_when_missing
 
   train:
     cmd: python -m ml.prediction.training.train_model
@@ -24,3 +34,7 @@ stages:
     metrics:
       - reports/metrics.json:
           cache: false
+    params:
+      - training
+      - mlflow.experiment_name
+      - mlflow.run_name

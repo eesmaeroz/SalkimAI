@@ -215,10 +215,23 @@ def main() -> None:
         X=X,
     )
 
-    mlflow_tracking_uri = PROJECT_ROOT / params["mlflow"]["tracking_uri"]
+    mlflow_tracking_uri = params["mlflow"]["tracking_uri"]
+    artifact_location = params["mlflow"].get("artifact_location")
 
-    mlflow.set_tracking_uri(str(mlflow_tracking_uri))
-    mlflow.set_experiment(params["mlflow"]["experiment_name"])
+    mlflow.set_tracking_uri(mlflow_tracking_uri)
+
+    experiment_name = params["mlflow"]["experiment_name"]
+
+    existing_experiment = mlflow.get_experiment_by_name(experiment_name)
+
+    if existing_experiment is None:
+        mlflow.create_experiment(
+            name=experiment_name,
+            artifact_location=artifact_location,
+    )
+
+    mlflow.set_experiment(experiment_name)
+    
 
     with mlflow.start_run(run_name=params["mlflow"]["run_name"]):
         model.fit(X_train, y_train)
@@ -258,10 +271,7 @@ def main() -> None:
         for metric_name, metric_value in metrics.items():
             mlflow.log_metric(metric_name, metric_value)
 
-        mlflow.sklearn.log_model(
-            sk_model=model,
-            artifact_path="model",
-        )
+        mlflow.sklearn.log_model(sk_model=model, artifact_path="model")
 
         mlflow.log_artifact(str(metrics_output_path))
 

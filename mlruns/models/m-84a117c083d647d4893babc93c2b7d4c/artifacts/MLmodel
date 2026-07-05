@@ -1,0 +1,23 @@
+artifact_path: file:///C:/salkim_ai/mlruns/models/m-84a117c083d647d4893babc93c2b7d4c/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.skops
+    predict_fn: predict
+    python_version: 3.14.4
+  sklearn:
+    code: null
+    pickled_model: model.skops
+    serialization_format: skops
+    sklearn_version: 1.9.0
+    skops_trusted_types: null
+mlflow_version: 3.14.0
+model_id: m-84a117c083d647d4893babc93c2b7d4c
+model_size_bytes: 6425447
+model_uuid: m-84a117c083d647d4893babc93c2b7d4c
+prompts: null
+run_id: d2da4adb6c874d3284c5996f407aeac8
+utc_time_created: '2026-07-03 17:29:58.493379'
