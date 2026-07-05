@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Local caches
+.cache/
+
+# Generated pipeline data and artifacts
+data/raw/greenhouse_data.csv
+data/processed/greenhouse_features.csv
+models/
+reports/
+
+# MLflow local tracking store
+mlflow.db
+mlruns/
+

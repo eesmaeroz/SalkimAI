@@ -1,0 +1,88 @@
+schema: '2.0'
+stages:
+  create_sample_data:
+    cmd: python scripts/create_sample_data.py
+    deps:
+    - path: scripts/create_sample_data.py
+      hash: md5
+      md5: 735418145cd3b3fdb7bb59db0cb45116
+      size: 3670
+    outs:
+    - path: data/raw/greenhouse_data.csv
+      hash: md5
+      md5: bc2d7b45b2dee8a2b5301c7e8f7a64f9
+      size: 22001
+  make_features:
+    cmd: python -m ml.prediction.features.feature_engineering
+    deps:
+    - path: config/params.yaml
+      hash: md5
+      md5: a64da13d227add84b7855ce6274a0f60
+      size: 954
+    - path: data/raw/greenhouse_data.csv
+      hash: md5
+      md5: bc2d7b45b2dee8a2b5301c7e8f7a64f9
+      size: 22001
+    - path: ml/prediction/features/feature_engineering.py
+      hash: md5
+      md5: 816a35dd82b9785d32800ae1a4ee6a82
+      size: 8302
+    - path: ml/prediction/features/gdd_calculator.py
+      hash: md5
+      md5: b79e6b8924d4ac4dd0e433fd04754065
+      size: 1419
+    - path: ml/prediction/features/weather_api_mock.py
+      hash: md5
+      md5: f0a3478aa92760e41d4ee30ceeedf4c2
+      size: 6148
+    params:
+      config/params.yaml:
+        feature_engineering.tomato_base_temperature_C: 10
+        feature_engineering.use_mock_weather_when_missing: true
+    outs:
+    - path: data/processed/greenhouse_features.csv
+      hash: md5
+      md5: 49a5325be15d3e724955ddb4e67cd439
+      size: 46966
+    - path: reports/feature_report.json
+      hash: md5
+      md5: d119d1e4a94421184506a623fc997351
+      size: 459
+  train:
+    cmd: python -m ml.prediction.training.train_model
+    deps:
+    - path: config/params.yaml
+      hash: md5
+      md5: a64da13d227add84b7855ce6274a0f60
+      size: 954
+    - path: data/processed/greenhouse_features.csv
+      hash: md5
+      md5: 49a5325be15d3e724955ddb4e67cd439
+      size: 46966
+    - path: ml/prediction/training/train_model.py
+      hash: md5
+      md5: 79eb4cfbf2b66f4c65797a93b7132db8
+      size: 7217
+    params:
+      config/params.yaml:
+        mlflow.experiment_name: salkim_yield_prediction
+        mlflow.run_name: random_forest_baseline
+        training:
+          target_column: yield_kg_per_m2
+          test_size: 0.2
+          random_state: 42
+          model:
+            type: RandomForestRegressor
+            n_estimators: 200
+            max_depth:
+            min_samples_split: 2
+            min_samples_leaf: 1
+    outs:
+    - path: models/random_forest_yield_model.joblib
+      hash: md5
+      md5: f9281c6311d6bc10c8b0df5a2b391ab1
+      size: 2217978
+    - path: reports/metrics.json
+      hash: md5
+      md5: 516e2723accaaeb6fc9f99a2fe2d3add
+      size: 92

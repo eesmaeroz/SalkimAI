@@ -20,8 +20,9 @@ stages:
       - reports/feature_report.json:
           cache: false
     params:
-      - feature_engineering.tomato_base_temperature_C
-      - feature_engineering.use_mock_weather_when_missing
+      - config/params.yaml:
+          - feature_engineering.tomato_base_temperature_C
+          - feature_engineering.use_mock_weather_when_missing
 
   train:
     cmd: python -m ml.prediction.training.train_model
@@ -35,6 +36,7 @@ stages:
       - reports/metrics.json:
           cache: false
     params:
-      - training
-      - mlflow.experiment_name
-      - mlflow.run_name
+      - config/params.yaml:
+          - training
+          - mlflow.experiment_name
+          - mlflow.run_name
