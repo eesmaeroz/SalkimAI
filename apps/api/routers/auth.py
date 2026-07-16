@@ -19,6 +19,7 @@ from apps.api.services.auth import (
     create_access_token,
     create_refresh_token,
     decode_token,
+    get_current_user,
 )
 
 router = APIRouter(tags=["auth"])
@@ -55,6 +56,7 @@ class RefreshRequest(BaseModel):
 
 class RefreshResponse(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str = "bearer"
     expires_in: int = 900
 
@@ -149,5 +151,27 @@ def refresh_access_token(request: RefreshRequest, db: Session = Depends(get_db))
         )
 
     new_access_token = create_access_token(data={"sub": str(user.id)})
+    new_refresh_token = create_refresh_token(data={"sub": str(user.id)})
 
-    return RefreshResponse(access_token=new_access_token)
+    return RefreshResponse(
+        access_token=new_access_token,
+        refresh_token=new_refresh_token,
+    )
+
+
+@router.delete(
+    "/me",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Kullanıcı Hesabını ve Verilerini Sil (KVKK)",
+)
+def delete_current_user(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Mevcut kullanıcının hesabını ve ilişkili tüm verilerini (seralar, tahminler vs.) kalıcı olarak siler.
+    KVKK/GDPR "unutulma hakkı" gereksinimi.
+    """
+    db.delete(current_user)
+    db.commit()
+    return None
