@@ -16,9 +16,11 @@ SalkımAI; domates görüntülerinden hastalık tespiti, olgunluk analizi ve has
 ## Teknolojiler
 - YOLOv8 — Domates tespiti
 - EfficientNet-B4 — Hastalık ve olgunluk sınıflandırma
+- XGBoost + LSTM — Hasat ve rekolte tahmini
 - FastAPI — Backend API
 - Docker + Kubernetes — Altyapı
 - PostgreSQL + Redis — Veritabanı ve kuyruk
+- Flutter — Mobil Uygulama
 
 ## Sprint 1 Özeti
 | Görev | Durum | Skor |
@@ -42,11 +44,10 @@ Sprint 1 klasöründe aşağıdaki belgeler mevcuttur:
 ## Repo Yapısı
 ```
 SalkımAI/
-├── Sprint1/
-│   ├── daily_scrum.md
-│   ├── sprint_review.md
-│   ├── sprint_retro.md
-│   ├── sprint_board.png
-│   └── urun_durumu.png
+├── apps/api/       # FastAPI Backend
+├── ml/             # Makine Öğrenmesi & Veri Bilimi
+├── lib/            # Flutter Mobil Uygulama
+├── infra/          # Docker & K8s Altyapısı
+├── Sprint1/        # Sprint Belgeleri
 └── README.md
 ```
