@@ -1,9 +1,12 @@
+# OS
+.DS_Store
+Thumbs.db
+
 # Miscellaneous
 *.class
 *.log
-*.pyc
 *.swp
-.DS_Store
+*.swo
 .atom/
 .build/
 .buildlog/
@@ -12,16 +15,12 @@
 .swiftpm/
 migrate_working_dir/
 
-# IntelliJ related
+# IDE
 *.iml
 *.ipr
 *.iws
 .idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+.vscode/
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -47,18 +46,42 @@ app.*.map.json
 # Python
 __pycache__/
 *.py[cod]
+*.pyc
 .pytest_cache/
 .venv/
-
-# Local caches
+venv/
+*.egg-info/
+.eggs/
+dist/
+*.egg
 .cache/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Docker volumes (local)
+postgres_data/
+minio_data/
+
+# Machine Learning Weights (CRITICAL - GitHub 100MB limit)
+*.pth
+*.pt
+*.onnx
+*.tflite
+*.h5
+*.pb
+*.safetensors
 
 # Generated pipeline data and artifacts
 data/raw/greenhouse_data.csv
 data/processed/greenhouse_features.csv
-models/
 reports/
 
 # MLflow local tracking store
 mlflow.db
 mlruns/
+
+# Docs
+*.docx

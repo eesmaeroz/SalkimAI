@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: salkim-worker
+  namespace: salkim
+  labels:
+    app: salkim-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: salkim-worker
+  template:
+    metadata:
+      labels:
+        app: salkim-worker
+    spec:
+      containers:
+        - name: celery-worker
+          image: salkim-worker:latest
+          imagePullPolicy: IfNotPresent
+          command: ["celery", "-A", "apps.api.celery_worker.celery_app", "worker", "--loglevel=info", "-P", "threads"]
+          envFrom:
+            - secretRef:
+                name: salkim-secrets
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+              # Faz 3: GPU node affinity (nvidia.com/gpu: 1 eklenebilir)

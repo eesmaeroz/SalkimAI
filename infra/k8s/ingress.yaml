@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: salkim-ingress
+  namespace: salkim
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Görüntü upload'ları için
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api/v1
+            pathType: Prefix
+            backend:
+              service:
+                name: salkim-api
+                port:
+                  number: 80
