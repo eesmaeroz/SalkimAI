@@ -41,6 +41,15 @@ Sprint 1 klasöründe aşağıdaki belgeler mevcuttur:
 - Sprint Board
 - Ürün Durumu
 
+## Makine Öğrenmesi & Veri Bilimi (ML)
+- DVC pipeline: örnek veri üretimi, feature engineering ve model eğitimi
+- MLflow: Random Forest parametreleri, MAE/RMSE/R² metrikleri ve model artifact'i
+- GDD (Growing Degree Days) hesaplama
+- İnternet gerektirmeyen deterministik hava durumu mock'u
+- Open-Meteo canlı istemcisi: önbellek ve otomatik yeniden deneme
+
+Kurulum ve çalıştırma adımları için [RUN_COMMANDS.md](RUN_COMMANDS.md) dosyasına bakın.
+
 ## Repo Yapısı
 ```
 SalkımAI/

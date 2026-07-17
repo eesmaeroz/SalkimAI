@@ -1,0 +1,37 @@
+paths:
+  raw_data: data/raw/greenhouse_data.csv
+  processed_data: data/processed/greenhouse_features.csv
+  model_output: models/random_forest_yield_model.joblib
+  metrics_output: reports/metrics.json
+  feature_report_output: reports/feature_report.json
+  predictions_output: reports/predictions.csv
+
+mlflow:
+  tracking_uri: sqlite:///C:/salkim_ai/mlflow.db
+  artifact_location: file:///C:/salkim_ai/mlruns
+  experiment_name: salkim_yield_prediction
+  run_name: random_forest_baseline
+
+feature_engineering:
+  tomato_base_temperature_C: 10
+  use_mock_weather_when_missing: true
+
+weather:
+  api_url: https://api.open-meteo.com/v1/forecast
+  latitude: 40.8991
+  longitude: 31.1888
+  cache_expire_seconds: 3600
+  retries: 5
+  backoff_factor: 0.2
+
+training:
+  target_column: yield_kg_per_m2
+  test_size: 0.2
+  random_state: 42
+
+  model:
+    type: RandomForestRegressor
+    n_estimators: 200
+    max_depth: null
+    min_samples_split: 2
+    min_samples_leaf: 1
