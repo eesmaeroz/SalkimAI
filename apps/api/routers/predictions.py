@@ -33,21 +33,21 @@ router = APIRouter(tags=["predictions"])
 
 class HarvestPredictionRequest(BaseModel):
     greenhouse_id: uuid.UUID
-    gdd_accumulated: Optional[float] = Field(
-        None, ge=0, description="Birikimli GDD (T1 modülünden veya hesaplanmış)"
-    )
-    days_since_planting: Optional[int] = Field(
-        None, ge=0, le=365, description="Ekim tarihinden bu yana geçen gün"
-    )
-    avg_temp_last_7d: Optional[float] = Field(
-        None, ge=-10, le=60, description="Son 7 günlük ortalama sıcaklık (°C)"
-    )
-    avg_humidity_last_7d: Optional[float] = Field(
-        None, ge=0, le=100, description="Son 7 günlük ortalama nem (%)"
-    )
-    current_maturity_score: Optional[float] = Field(
-        None, ge=0, le=1, description="Görüntü analizinden gelen olgunluk skoru"
-    )
+    crop_type: str = Field(..., description="Bitki türü, örn: Tomato")
+    variety: str = Field(..., description="Çeşit, örn: Beefsteak")
+    avg_temperature_C: float = Field(..., description="Ortalama sıcaklık")
+    min_temperature_C: float = Field(..., description="Min sıcaklık")
+    max_temperature_C: float = Field(..., description="Max sıcaklık")
+    humidity_percent: float = Field(..., description="Nem oranı")
+    co2_ppm: float = Field(..., description="CO2 yoğunluğu")
+    light_intensity_lux: float = Field(..., description="Işık yoğunluğu")
+    photoperiod_hours: float = Field(..., description="Fotoperiyot saat")
+    irrigation_mm: float = Field(..., description="Sulama miktarı mm")
+    fertilizer_N_kg_ha: float = Field(..., description="Gübre N miktarı")
+    fertilizer_P_kg_ha: float = Field(..., description="Gübre P miktarı")
+    fertilizer_K_kg_ha: float = Field(..., description="Gübre K miktarı")
+    pest_severity: float = Field(..., description="Zararlı seviyesi")
+    soil_pH: float = Field(..., description="Toprak pH")
 
 
 class HarvestPredictionResponse(BaseModel):
@@ -55,6 +55,7 @@ class HarvestPredictionResponse(BaseModel):
     greenhouse_id: uuid.UUID
     predicted_harvest_date: Optional[date]
     predicted_days_remaining: Optional[int]
+    predicted_yield_kg_m2: Optional[float]
     confidence_score: Optional[float]
     model_version: Optional[str]
     created_at: datetime
@@ -106,53 +107,45 @@ def _verify_greenhouse_owner(greenhouse_id: uuid.UUID, user: User, db: Session) 
     "/harvest",
     response_model=HarvestPredictionResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Hasat Tarihi Tahmini",
+    summary="Hasat Tarihi ve Rekolte Tahmini",
 )
-def request_harvest_prediction(
-    body: HarvestPredictionRequest,
-    user: User = Depends(get_current_user),
+def create_harvest_prediction(
+    request: HarvestPredictionRequest,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    XGBoost + LSTM ensemble modelini kullanarak hasat tarihi tahmini yapar.
+    gh = _verify_greenhouse_owner(request.greenhouse_id, current_user, db)
 
-    Feature'lar:
-    - GDD (Growing Degree Days) birikimi
-    - Ekim tarihinden bu yana geçen gün sayısı
-    - Son 7 günlük hava koşulları (sıcaklık, nem)
-    - Görüntü analizinden gelen olgunluk skoru
-
-    Sonuç hem döndürülür hem de DB'ye yazılır (kalibrasyon için).
-    """
-    _verify_greenhouse_owner(body.greenhouse_id, user, db)
-
-    # ML servisi çağır
-    result = predict_harvest(
-        greenhouse_id=str(body.greenhouse_id),
-        gdd_accumulated=body.gdd_accumulated,
-        days_since_planting=body.days_since_planting,
-        avg_temp_last_7d=body.avg_temp_last_7d,
-        avg_humidity_last_7d=body.avg_humidity_last_7d,
-        current_maturity_score=body.current_maturity_score,
+    prediction_result = predict_harvest(
+        crop_type=request.crop_type,
+        variety=request.variety,
+        avg_temperature_C=request.avg_temperature_C,
+        min_temperature_C=request.min_temperature_C,
+        max_temperature_C=request.max_temperature_C,
+        humidity_percent=request.humidity_percent,
+        co2_ppm=request.co2_ppm,
+        light_intensity_lux=request.light_intensity_lux,
+        photoperiod_hours=request.photoperiod_hours,
+        irrigation_mm=request.irrigation_mm,
+        fertilizer_N_kg_ha=request.fertilizer_N_kg_ha,
+        fertilizer_P_kg_ha=request.fertilizer_P_kg_ha,
+        fertilizer_K_kg_ha=request.fertilizer_K_kg_ha,
+        pest_severity=request.pest_severity,
+        soil_pH=request.soil_pH,
     )
 
-    # DB'ye kaydet
-    prediction = HarvestPrediction(
-        greenhouse_id=body.greenhouse_id,
-        gdd_accumulated=body.gdd_accumulated,
-        days_since_planting=body.days_since_planting,
-        avg_temp_last_7d=body.avg_temp_last_7d,
-        avg_humidity_last_7d=body.avg_humidity_last_7d,
-        current_maturity_score=body.current_maturity_score,
-        predicted_harvest_date=result["predicted_harvest_date"],
-        predicted_days_remaining=result["predicted_days_remaining"],
-        confidence_score=result["confidence_score"],
-        model_version=result["model_version"],
-        raw_features=body.model_dump(exclude={"greenhouse_id"}),
+    pred = HarvestPrediction(
+        greenhouse_id=gh.id,
+        gdd_accumulated=0.0, # Not used in new model but kept for DB compat
+        days_since_planting=0,
+        predicted_harvest_date=prediction_result["predicted_harvest_date"],
+        predicted_days_remaining=prediction_result["predicted_days_remaining"],
+        predicted_yield_kg_m2=prediction_result["predicted_yield_kg_m2"],
+        confidence_score=prediction_result["confidence_score"],
+        model_version=prediction_result["model_version"],
     )
-    db.add(prediction)
+    db.add(pred)
     db.commit()
-    db.refresh(prediction)
 
     # Prometheus metric güncelle
     HARVEST_PREDICTIONS_TOTAL.inc()

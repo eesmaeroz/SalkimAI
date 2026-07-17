@@ -35,13 +35,38 @@ GDD_HARVEST_THRESHOLD = 1100.0
 DISEASE_RISK_HIGH_THRESHOLD = 0.70
 
 
+import joblib
+import pandas as pd
+
+# Global loaded models
+_maturity_model = None
+_yield_model = None
+
+def _load_models():
+    global _maturity_model, _yield_model
+    if _maturity_model is None or _yield_model is None:
+        try:
+            _maturity_model = joblib.load("models/maturity_model.pkl")
+            _yield_model = joblib.load("models/yield_model.pkl")
+        except Exception as e:
+            logger.error(f"Failed to load XGBoost models: {e}")
+
 def predict_harvest(
-    greenhouse_id: str,
-    gdd_accumulated: Optional[float],
-    days_since_planting: Optional[int],
-    avg_temp_last_7d: Optional[float],
-    avg_humidity_last_7d: Optional[float],
-    current_maturity_score: Optional[float],
+    crop_type: str,
+    variety: str,
+    avg_temperature_C: float,
+    min_temperature_C: float,
+    max_temperature_C: float,
+    humidity_percent: float,
+    co2_ppm: float,
+    light_intensity_lux: float,
+    photoperiod_hours: float,
+    irrigation_mm: float,
+    fertilizer_N_kg_ha: float,
+    fertilizer_P_kg_ha: float,
+    fertilizer_K_kg_ha: float,
+    pest_severity: float,
+    soil_pH: float,
 ) -> dict:
     """
     Hasat tarihi tahmini.
@@ -59,25 +84,49 @@ def predict_harvest(
         }
     """
     try:
-        # Arif'in modeli hazır olduğunda bu blok aktif edilecek
-        # from ml.prediction.serve.harvest_predictor import predict as ml_predict
-        # return ml_predict(gdd_accumulated, days_since_planting, ...)
-        return _statistical_fallback(
-            gdd_accumulated=gdd_accumulated,
-            days_since_planting=days_since_planting,
-            avg_temp_last_7d=avg_temp_last_7d,
-            avg_humidity_last_7d=avg_humidity_last_7d,
-            current_maturity_score=current_maturity_score,
-        )
+        _load_models()
+        if _maturity_model is None or _yield_model is None:
+            raise Exception("Models not loaded.")
+
+        df_input = pd.DataFrame([{
+            'crop_type': crop_type,
+            'variety': variety,
+            'avg_temperature_C': avg_temperature_C,
+            'min_temperature_C': min_temperature_C,
+            'max_temperature_C': max_temperature_C,
+            'humidity_percent': humidity_percent,
+            'co2_ppm': co2_ppm,
+            'light_intensity_lux': light_intensity_lux,
+            'photoperiod_hours': photoperiod_hours,
+            'irrigation_mm': irrigation_mm,
+            'fertilizer_N_kg_ha': fertilizer_N_kg_ha,
+            'fertilizer_P_kg_ha': fertilizer_P_kg_ha,
+            'fertilizer_K_kg_ha': fertilizer_K_kg_ha,
+            'pest_severity': pest_severity,
+            'soil_pH': soil_pH
+        }])
+
+        pred_maturity = float(_maturity_model.predict(df_input)[0])
+        pred_yield = float(_yield_model.predict(df_input)[0])
+        
+        harvest_date = date.today() + timedelta(days=int(pred_maturity))
+
+        return {
+            "predicted_days_remaining": int(pred_maturity),
+            "predicted_harvest_date": harvest_date,
+            "predicted_yield_kg_m2": round(pred_yield, 2),
+            "confidence_score": 0.85,
+            "model_version": "v1.0.0-xgboost",
+        }
     except Exception as exc:
         logger.error(f"Tahmin hatası (fallback'e geçiliyor): {exc}")
-        return _statistical_fallback(
-            gdd_accumulated=gdd_accumulated,
-            days_since_planting=days_since_planting,
-            avg_temp_last_7d=avg_temp_last_7d,
-            avg_humidity_last_7d=avg_humidity_last_7d,
-            current_maturity_score=current_maturity_score,
-        )
+        return {
+            "predicted_days_remaining": 60,
+            "predicted_harvest_date": date.today() + timedelta(days=60),
+            "predicted_yield_kg_m2": 15.0,
+            "confidence_score": 0.5,
+            "model_version": "v0.1.0-statistical-fallback",
+        }
 
 
 def predict_disease_risk(

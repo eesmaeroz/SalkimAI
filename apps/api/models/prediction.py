@@ -81,6 +81,11 @@ class HarvestPrediction(TimestampMixin, Base):
         nullable=True,
         comment="Hasata kalan tahmini gün sayısı",
     )
+    predicted_yield_kg_m2: Mapped[Optional[float]] = mapped_column(
+        Float,
+        nullable=True,
+        comment="Tahmini Rekolte kg/m2",
+    )
     confidence_score: Mapped[Optional[float]] = mapped_column(
         Float,
         nullable=True,
