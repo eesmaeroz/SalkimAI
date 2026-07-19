@@ -1,8 +1,8 @@
-"""Open-Meteo client and deterministic offline weather mock.
+"""Open-Meteo JSON client and deterministic offline weather mock.
 
-The mock functions keep feature engineering repeatable in tests. The live client
-uses the Open-Meteo FlatBuffers SDK with an on-disk, one-hour response cache and
-automatic retries.
+The mock functions keep feature engineering repeatable in tests. The live
+Open-Meteo client uses the public JSON forecast endpoint, matching the curl
+format shown in the project notes.
 """
 
 from __future__ import annotations
@@ -14,20 +14,13 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+import requests_cache
+import yaml
 
 
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 DEFAULT_LATITUDE = 40.8991
 DEFAULT_LONGITUDE = 31.1888
-
-
-def _date_range(section: Any) -> pd.DatetimeIndex:
-    return pd.date_range(
-        start=pd.to_datetime(section.Time(), unit="s", utc=True),
-        end=pd.to_datetime(section.TimeEnd(), unit="s", utc=True),
-        freq=pd.Timedelta(seconds=section.Interval()),
-        inclusive="left",
-    )
 
 
 def fetch_open_meteo_forecast(
@@ -37,69 +30,101 @@ def fetch_open_meteo_forecast(
     expire_after: int = 3600,
     retries: int = 5,
     backoff_factor: float = 0.2,
+    api_url: str = OPEN_METEO_URL,
 ) -> dict[str, Any]:
-    """Fetch current, hourly and daily weather for the configured location."""
-    # Imports stay local so offline mock usage does not require network packages.
-    import openmeteo_requests
-    import requests_cache
-    from retry_requests import retry
+    """Fetch current, hourly and daily weather from Open-Meteo JSON API."""
+    cache_path = Path(cache_path)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    session = requests_cache.CachedSession(str(cache_path), expire_after=expire_after)
 
-    cache_file = Path(cache_path)
-    cache_file.parent.mkdir(parents=True, exist_ok=True)
-    cache_session = requests_cache.CachedSession(
-        str(cache_file), expire_after=expire_after
-    )
-    retry_session = retry(
-        cache_session, retries=retries, backoff_factor=backoff_factor
-    )
-    client = openmeteo_requests.Client(session=retry_session)
-
-    params = {
+    params: dict[str, Any] = {
         "latitude": latitude,
         "longitude": longitude,
-        "daily": ["temperature_2m_max", "temperature_2m_min", "weather_code"],
-        "hourly": "temperature_2m",
-        "current": ["temperature_2m", "relative_humidity_2m"],
+        "current": "temperature_2m,relative_humidity_2m,wind_speed_10m",
+        "hourly": "temperature_2m,relative_humidity_2m,wind_speed_10m",
+        "daily": "temperature_2m_max,temperature_2m_min,weather_code",
         "timezone": "auto",
     }
-    response = client.weather_api(OPEN_METEO_URL, params=params)[0]
+    last_error: Exception | None = None
+    for _ in range(max(int(retries), 1)):
+        try:
+            response = session.get(api_url, params=params, timeout=20)
+            response.raise_for_status()
+            payload = response.json()
+            break
+        except Exception as error:  # pragma: no cover - network fallback path
+            last_error = error
+    else:
+        raise RuntimeError("Open-Meteo request failed.") from last_error
 
-    current = response.Current()
+    current_payload = payload.get("current", {})
     current_data = {
-        "time": pd.to_datetime(current.Time(), unit="s", utc=True),
-        "temperature_2m": float(current.Variables(0).Value()),
-        "relative_humidity_2m": float(current.Variables(1).Value()),
+        "time": pd.to_datetime(current_payload.get("time")),
+        "temperature_2m": current_payload.get("temperature_2m"),
+        "relative_humidity_2m": current_payload.get("relative_humidity_2m"),
+        "wind_speed_10m": current_payload.get("wind_speed_10m"),
     }
 
-    hourly = response.Hourly()
+    hourly_payload = payload.get("hourly", {})
     hourly_dataframe = pd.DataFrame(
         {
-            "date": _date_range(hourly),
-            "temperature_2m": hourly.Variables(0).ValuesAsNumpy(),
+            "date": pd.to_datetime(hourly_payload.get("time", [])),
+            "temperature_2m": hourly_payload.get("temperature_2m", []),
+            "relative_humidity_2m": hourly_payload.get("relative_humidity_2m", []),
+            "wind_speed_10m": hourly_payload.get("wind_speed_10m", []),
         }
     )
 
-    daily = response.Daily()
+    daily_payload = payload.get("daily", {})
     daily_dataframe = pd.DataFrame(
         {
-            "date": _date_range(daily),
-            "temperature_2m_max": daily.Variables(0).ValuesAsNumpy(),
-            "temperature_2m_min": daily.Variables(1).ValuesAsNumpy(),
-            "weather_code": daily.Variables(2).ValuesAsNumpy(),
+            "date": pd.to_datetime(daily_payload.get("time", [])),
+            "temperature_2m_max": daily_payload.get("temperature_2m_max", []),
+            "temperature_2m_min": daily_payload.get("temperature_2m_min", []),
+            "weather_code": daily_payload.get("weather_code", []),
         }
     )
 
     return {
         "metadata": {
-            "latitude": response.Latitude(),
-            "longitude": response.Longitude(),
-            "elevation": response.Elevation(),
-            "utc_offset_seconds": response.UtcOffsetSeconds(),
+            "latitude": payload.get("latitude"),
+            "longitude": payload.get("longitude"),
+            "elevation": payload.get("elevation"),
+            "timezone": payload.get("timezone"),
         },
         "current": current_data,
         "hourly": hourly_dataframe,
         "daily": daily_dataframe,
     }
+
+
+def summarize_open_meteo_forecast(forecast: dict[str, Any]) -> dict[str, Any]:
+    """Convert Open-Meteo JSON forecast output into project weather fields."""
+    daily = forecast["daily"]
+    hourly = forecast["hourly"]
+    if daily.empty and hourly.empty:
+        raise ValueError("Open-Meteo forecast response is empty.")
+
+    return {
+        "avg_temperature_C": float(hourly["temperature_2m"].mean()),
+        "min_temperature_C": float(daily["temperature_2m_min"].min()),
+        "max_temperature_C": float(daily["temperature_2m_max"].max()),
+        "humidity_percent": float(hourly["relative_humidity_2m"].mean()),
+    }
+
+
+def get_open_meteo_weather_data(config: dict[str, Any]) -> dict[str, Any]:
+    """Fetch and summarize Open-Meteo data using project config."""
+    forecast = fetch_open_meteo_forecast(
+        latitude=config["latitude"],
+        longitude=config["longitude"],
+        cache_path=Path(__file__).resolve().parents[3] / ".cache" / "openmeteo_json",
+        expire_after=config["cache_expire_seconds"],
+        retries=config["retries"],
+        backoff_factor=config["backoff_factor"],
+        api_url=config["api_url"],
+    )
+    return summarize_open_meteo_forecast(forecast)
 
 
 def _stable_seed(value: str) -> int:
@@ -160,7 +185,19 @@ def enrich_missing_weather_values(row: dict[str, Any]) -> dict[str, Any]:
 
 
 def main() -> None:
-    forecast = fetch_open_meteo_forecast()
+    project_root = Path(__file__).resolve().parents[3]
+    with (project_root / "config" / "params.yaml").open(encoding="utf-8") as stream:
+        weather = yaml.safe_load(stream)["weather"]
+
+    forecast = fetch_open_meteo_forecast(
+        latitude=weather["latitude"],
+        longitude=weather["longitude"],
+        cache_path=project_root / ".cache" / "openmeteo",
+        expire_after=weather["cache_expire_seconds"],
+        retries=weather["retries"],
+        backoff_factor=weather["backoff_factor"],
+        api_url=weather["api_url"],
+    )
     print("Metadata:", forecast["metadata"])
     print("Current:", forecast["current"])
     print("\nHourly weather\n", forecast["hourly"])

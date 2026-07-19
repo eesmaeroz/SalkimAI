@@ -5,64 +5,88 @@ stages:
     deps:
     - path: scripts/create_sample_data.py
       hash: md5
-      md5: 735418145cd3b3fdb7bb59db0cb45116
-      size: 3670
+      md5: ae8bfc7967d317bdd778218fba0e9e78
+      size: 3711
     outs:
     - path: data/raw/greenhouse_data.csv
       hash: md5
-      md5: bc2d7b45b2dee8a2b5301c7e8f7a64f9
-      size: 22001
+      md5: 2881ddfd554975b8a99af522dc5f67a7
+      size: 23513
   make_features:
     cmd: python -m ml.prediction.features.feature_engineering
     deps:
     - path: config/params.yaml
       hash: md5
-      md5: a64da13d227add84b7855ce6274a0f60
-      size: 954
+      md5: fa0a23f2ea3a82839dd8eb07d956e942
+      size: 1674
+    - path: config/schema.yaml
+      hash: md5
+      md5: 9c79462e68d0494b90e8ddfc21a50693
+      size: 971
     - path: data/raw/greenhouse_data.csv
       hash: md5
-      md5: bc2d7b45b2dee8a2b5301c7e8f7a64f9
-      size: 22001
+      md5: 2881ddfd554975b8a99af522dc5f67a7
+      size: 23513
     - path: ml/prediction/features/feature_engineering.py
       hash: md5
-      md5: 816a35dd82b9785d32800ae1a4ee6a82
-      size: 8302
+      md5: 4bacffcf83c5f64ce135b8a09735e7c9
+      size: 9548
     - path: ml/prediction/features/gdd_calculator.py
       hash: md5
       md5: b79e6b8924d4ac4dd0e433fd04754065
       size: 1419
+    - path: ml/prediction/features/openweathermap_client.py
+      hash: md5
+      md5: fa3ce1e6c76e64a1810adb0a30a02ac0
+      size: 4047
     - path: ml/prediction/features/weather_api_mock.py
       hash: md5
-      md5: f0a3478aa92760e41d4ee30ceeedf4c2
-      size: 6148
+      md5: 00f15d2b4c0d22336a4bfdb42af5fd61
+      size: 7523
     params:
       config/params.yaml:
         feature_engineering.tomato_base_temperature_C: 10
         feature_engineering.use_mock_weather_when_missing: true
+        feature_engineering.weather_provider: mock
+        openweathermap:
+          api_url: https://api.openweathermap.org/data/2.5/forecast
+          api_key_env: OPENWEATHERMAP_API_KEY
+          latitude: 40.8991
+          longitude: 31.1888
+          units: metric
+          cache_expire_seconds: 3600
+          timeout_seconds: 20
+        weather:
+          api_url: https://api.open-meteo.com/v1/forecast
+          latitude: 40.8991
+          longitude: 31.1888
+          cache_expire_seconds: 3600
+          retries: 5
+          backoff_factor: 0.2
     outs:
     - path: data/processed/greenhouse_features.csv
       hash: md5
-      md5: 49a5325be15d3e724955ddb4e67cd439
-      size: 46966
+      md5: 8e75328454652c529003323a6c12a64d
+      size: 48478
     - path: reports/feature_report.json
       hash: md5
-      md5: d119d1e4a94421184506a623fc997351
-      size: 459
+      md5: ace5d32cf0b0a26c4e593f37e270ee64
+      size: 534
   train:
     cmd: python -m ml.prediction.training.train_model
     deps:
     - path: config/params.yaml
       hash: md5
-      md5: a64da13d227add84b7855ce6274a0f60
-      size: 954
+      md5: fa0a23f2ea3a82839dd8eb07d956e942
+      size: 1674
     - path: data/processed/greenhouse_features.csv
       hash: md5
-      md5: 49a5325be15d3e724955ddb4e67cd439
-      size: 46966
+      md5: 8e75328454652c529003323a6c12a64d
+      size: 48478
     - path: ml/prediction/training/train_model.py
       hash: md5
-      md5: 79eb4cfbf2b66f4c65797a93b7132db8
-      size: 7217
+      md5: 495ce64cd253f59da037c505c971f3aa
+      size: 7456
     params:
       config/params.yaml:
         mlflow.experiment_name: salkim_yield_prediction
@@ -80,9 +104,72 @@ stages:
     outs:
     - path: models/random_forest_yield_model.joblib
       hash: md5
-      md5: f9281c6311d6bc10c8b0df5a2b391ab1
-      size: 2217978
+      md5: 7455296ef66d5f7a40943dc8b5bce24c
+      size: 2217946
     - path: reports/metrics.json
       hash: md5
-      md5: 516e2723accaaeb6fc9f99a2fe2d3add
-      size: 92
+      md5: 67d3e62f2e18371b9c01c62aa3077faa
+      size: 94
+  train_harvest:
+    cmd: python -m ml.prediction.training.train_harvest_model
+    deps:
+    - path: config/params.yaml
+      hash: md5
+      md5: fa0a23f2ea3a82839dd8eb07d956e942
+      size: 1674
+    - path: data/processed/greenhouse_features.csv
+      hash: md5
+      md5: 8e75328454652c529003323a6c12a64d
+      size: 48478
+    - path: ml/prediction/training/train_harvest_model.py
+      hash: md5
+      md5: 8bd4969bb8fd5b65e021ac521a91b409
+      size: 6135
+    params:
+      config/params.yaml:
+        harvest_training:
+          target_column: days_to_maturity
+          test_size: 0.2
+          random_state: 42
+          model:
+            type: XGBRegressor
+            n_estimators: 300
+            max_depth: 4
+            learning_rate: 0.05
+            subsample: 0.9
+            colsample_bytree: 0.9
+            objective: reg:squarederror
+        mlflow.experiment_name: salkim_yield_prediction
+    outs:
+    - path: models/xgboost_harvest_date_model.joblib
+      hash: md5
+      md5: 2d115dd17ced4a5ff44483a9efa932fb
+      size: 430717
+    - path: reports/harvest_metrics.json
+      hash: md5
+      md5: baf9ec8d1bacdc536e74688bb5a457b9
+      size: 101
+  predict_harvest:
+    cmd: python -m ml.prediction.inference.predict_harvest_date
+    deps:
+    - path: config/params.yaml
+      hash: md5
+      md5: fa0a23f2ea3a82839dd8eb07d956e942
+      size: 1674
+    - path: data/processed/greenhouse_features.csv
+      hash: md5
+      md5: 8e75328454652c529003323a6c12a64d
+      size: 48478
+    - path: ml/prediction/inference/predict_harvest_date.py
+      hash: md5
+      md5: 6c8af82f61d255d0050548d7839e3231
+      size: 2358
+    - path: models/xgboost_harvest_date_model.joblib
+      hash: md5
+      md5: 2d115dd17ced4a5ff44483a9efa932fb
+      size: 430717
+    outs:
+    - path: reports/harvest_predictions.csv
+      hash: md5
+      md5: 7c51e9d762663219279ce46bd56d1e45
+      size: 48874

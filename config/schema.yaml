@@ -1,0 +1,38 @@
+dataset:
+  required_columns:
+    greenhouse_id: string
+    crop_type: string
+    variety: string
+    planting_date: date
+    harvest_date: date
+    days_to_maturity: numeric
+    avg_temperature_C: numeric
+    min_temperature_C: numeric
+    max_temperature_C: numeric
+    humidity_percent: numeric
+    co2_ppm: numeric
+    light_intensity_lux: numeric
+    photoperiod_hours: numeric
+    irrigation_mm: numeric
+    fertilizer_N_kg_ha: numeric
+    fertilizer_P_kg_ha: numeric
+    fertilizer_K_kg_ha: numeric
+    pest_severity: numeric
+    soil_pH: numeric
+    yield_kg_per_m2: numeric
+
+  optional_columns:
+    data_source: string
+
+  generated_columns:
+    calculated_days_to_maturity: numeric
+    gdd: numeric
+    temperature_range_C: numeric
+    total_fertilizer_kg_ha: numeric
+    N_ratio: numeric
+    P_ratio: numeric
+    K_ratio: numeric
+    light_exposure_index: numeric
+    irrigation_per_day: numeric
+    co2_light_interaction: numeric
+    pest_health_score: numeric

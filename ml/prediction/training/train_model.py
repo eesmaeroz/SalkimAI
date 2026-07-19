@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import yaml
 
+from mlflow.models import infer_signature
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -141,7 +142,7 @@ def evaluate_model(
     model: Pipeline,
     X_test: pd.DataFrame,
     y_test: pd.Series,
-) -> dict:
+) -> tuple[dict, np.ndarray]:
     """
     Test verisi üzerinde model başarımını hesaplar.
 
@@ -163,7 +164,7 @@ def evaluate_model(
         "R2": float(r2),
     }
 
-    return metrics
+    return metrics, y_pred
 
 
 def save_metrics(
@@ -231,12 +232,12 @@ def main() -> None:
     )
 
     mlflow.set_experiment(experiment_name)
-    
+
 
     with mlflow.start_run(run_name=params["mlflow"]["run_name"]):
         model.fit(X_train, y_train)
 
-        metrics = evaluate_model(
+        metrics, y_pred = evaluate_model(
             model=model,
             X_test=X_test,
             y_test=y_test,
@@ -271,7 +272,13 @@ def main() -> None:
         for metric_name, metric_value in metrics.items():
             mlflow.log_metric(metric_name, metric_value)
 
-        mlflow.sklearn.log_model(sk_model=model, artifact_path="model")
+        signature = infer_signature(X_test, y_pred)
+        mlflow.sklearn.log_model(
+            sk_model=model,
+            artifact_path="model",
+            signature=signature,
+            input_example=X_test.head(3),
+        )
 
         mlflow.log_artifact(str(metrics_output_path))
 

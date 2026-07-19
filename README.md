@@ -1,19 +1,30 @@
-# Salkım AI — MLflow, DVC ve Feature Engineering
+# Salkım AI — MLflow, DVC ve Tahmin Pipeline
 
-Sera domates verimi tahmini için tekrarlanabilir bir MLOps örneğidir.
+Sera domates verimi ve hasat zamanı tahmini için tekrarlanabilir bir MLOps örneği.
 
 ## İçerik
 
-- DVC pipeline: örnek veri üretimi, feature engineering ve model eğitimi
-- MLflow: Random Forest parametreleri, MAE/RMSE/R² metrikleri ve model artifact'i
-- GDD (Growing Degree Days) hesaplama
-- İnternet gerektirmeyen deterministik hava durumu mock'u
-- Open-Meteo canlı istemcisi: önbellek ve otomatik yeniden deneme
+- DVC pipeline: örnek veri üretimi, feature engineering, model eğitimi
+- MLflow: deney, parametre, metrik ve model artifact kaydı
+- GDD hesaplayıcı
+- Deterministik hava durumu mock'u
+- Open-Meteo canlı hava istemcisi
+- OpenWeatherMap gerçek API entegrasyonu
+- Random Forest verim modeli
+- XGBoost hasat zamanı modeli
 
-Canlı hava istemcisi Düzce koordinatlarını (`40.8991, 31.1888`) kullanır ve
-mevcut sıcaklık/nem, saatlik sıcaklık ve günlük min–maks sıcaklık/hava kodunu
-getirir. Eğitim pipeline'ı tekrarlanabilirlik için varsayılan olarak mock veriyi
-kullanır.
+## Ana dosyalar
 
-Kurulum ve çalıştırma adımları için [RUN_COMMANDS.md](RUN_COMMANDS.md) dosyasına
-bakın.
+- `config/params.yaml`: pipeline ve model ayarları
+- `ml/prediction/features/gdd_calculator.py`: GDD hesaplama
+- `ml/prediction/features/weather_api_mock.py`: Open-Meteo + offline mock
+- `ml/prediction/features/openweathermap_client.py`: OpenWeatherMap entegrasyonu
+- `ml/prediction/features/feature_engineering.py`: feature üretimi
+- `ml/prediction/training/train_model.py`: Random Forest verim modeli
+- `ml/prediction/training/train_harvest_model.py`: XGBoost hasat zamanı modeli
+- `PROJECT_PLAN.md`: genel plan ve T1 kullanıcı görevleri
+
+Kurulum ve çalıştırma adımları için `RUN_COMMANDS.md` dosyasına bak.
+
+Model, rapor, MLflow kayıtları ve işlenmiş veri kaynak kod değildir; pipeline
+tarafından yeniden üretildikleri için Git dışında tutulur.

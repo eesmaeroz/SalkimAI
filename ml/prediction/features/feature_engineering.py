@@ -1,4 +1,4 @@
-"""Feature engineering entry points."""
+"""Feature engineering pipeline for greenhouse prediction datasets."""
 
 from __future__ import annotations
 
@@ -10,177 +10,158 @@ import pandas as pd
 import yaml
 
 from ml.prediction.features.gdd_calculator import calculate_gdd
-from ml.prediction.features.weather_api_mock import enrich_missing_weather_values
+from ml.prediction.features.openweathermap_client import get_openweathermap_weather_data
+from ml.prediction.features.weather_api_mock import (
+    enrich_missing_weather_values,
+    get_open_meteo_weather_data,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 PARAMS_PATH = PROJECT_ROOT / "config" / "params.yaml"
 
 
-REQUIRED_COLUMNS = [
-    "greenhouse_id",
-    "crop_type",
-    "variety",
-    "planting_date",
-    "harvest_date",
-    "days_to_maturity",
-    "avg_temperature_C",
-    "min_temperature_C",
-    "max_temperature_C",
-    "humidity_percent",
-    "co2_ppm",
-    "light_intensity_lux",
-    "photoperiod_hours",
-    "irrigation_mm",
-    "fertilizer_N_kg_ha",
-    "fertilizer_P_kg_ha",
-    "fertilizer_K_kg_ha",
-    "pest_severity",
-    "soil_pH",
-    "yield_kg_per_m2",
-]
-
-
-NUMERIC_COLUMNS = [
-    "days_to_maturity",
-    "avg_temperature_C",
-    "min_temperature_C",
-    "max_temperature_C",
-    "humidity_percent",
-    "co2_ppm",
-    "light_intensity_lux",
-    "photoperiod_hours",
-    "irrigation_mm",
-    "fertilizer_N_kg_ha",
-    "fertilizer_P_kg_ha",
-    "fertilizer_K_kg_ha",
-    "pest_severity",
-    "soil_pH",
-    "yield_kg_per_m2",
-]
-
-
 def load_params() -> dict:
-    """
-    config/params.yaml dosyasını okur.
-    """
-
-    with open(PARAMS_PATH, "r", encoding="utf-8") as file:
-        params = yaml.safe_load(file)
-
-    return params
+    """Load project parameters from config/params.yaml."""
+    with PARAMS_PATH.open("r", encoding="utf-8") as file:
+        return yaml.safe_load(file)
 
 
-def validate_columns(df: pd.DataFrame) -> None:
-    """
-    Veri setinde beklenen sütunlar var mı kontrol eder.
-    Eksik sütun varsa hata verir.
-    """
+def load_schema(params: dict) -> dict:
+    """Load dataset schema from config/schema.yaml."""
+    schema_path = PROJECT_ROOT / params["paths"]["schema"]
+    with schema_path.open("r", encoding="utf-8") as file:
+        return yaml.safe_load(file)
 
-    missing_columns = []
 
-    for column in REQUIRED_COLUMNS:
-        if column not in df.columns:
-            missing_columns.append(column)
+def get_required_columns(schema: dict) -> list[str]:
+    """Return required input columns from the dataset schema."""
+    return list(schema["dataset"]["required_columns"].keys())
+
+
+def get_numeric_columns(schema: dict) -> list[str]:
+    """Return numeric input columns from the dataset schema."""
+    return [
+        column
+        for column, column_type in schema["dataset"]["required_columns"].items()
+        if column_type == "numeric"
+    ]
+
+
+def validate_columns(df: pd.DataFrame, required_columns: list[str]) -> None:
+    """Validate that the raw dataset contains all required columns."""
+    missing_columns = [column for column in required_columns if column not in df.columns]
 
     if missing_columns:
         raise ValueError(
-            "Veri setinde eksik sütunlar var: "
+            "Dataset is missing required columns: "
             + ", ".join(missing_columns)
-            + "\nBeklenen sütunlar: "
-            + ", ".join(REQUIRED_COLUMNS)
+            + "\nExpected columns: "
+            + ", ".join(required_columns)
         )
 
 
 def read_dataset(path: str | Path) -> pd.DataFrame:
-    """
-    CSV veri setini okur.
-    Türkçe karakter veya encoding sorunu olursa utf-8-sig ile tekrar dener.
-    """
-
+    """Read a CSV dataset with a utf-8 fallback."""
     path = Path(path)
 
     if not path.exists():
         raise FileNotFoundError(
-            f"Veri dosyası bulunamadı: {path}. "
-            "Önce data/raw/greenhouse_data.csv dosyasını ekle "
-            "veya python scripts/create_sample_data.py komutunu çalıştır."
+            f"Raw data file not found: {path}. "
+            "Add data/raw/greenhouse_data.csv or run python scripts/create_sample_data.py."
         )
 
     try:
-        df = pd.read_csv(path)
+        return pd.read_csv(path)
     except UnicodeDecodeError:
-        df = pd.read_csv(path, encoding="utf-8-sig")
+        return pd.read_csv(path, encoding="utf-8-sig")
 
+
+def _fill_missing_from_openweathermap(
+    df: pd.DataFrame,
+    openweathermap_config: dict,
+) -> pd.DataFrame:
+    """Fill missing weather columns from OpenWeatherMap forecast summary."""
+    weather_summary = get_openweathermap_weather_data(openweathermap_config)
+    fillable_columns = (
+        "avg_temperature_C",
+        "min_temperature_C",
+        "max_temperature_C",
+        "humidity_percent",
+    )
+
+    df = df.copy()
+    for column in fillable_columns:
+        df[column] = df[column].fillna(weather_summary[column])
+    return df
+
+
+def _fill_missing_from_weather_summary(
+    df: pd.DataFrame,
+    weather_summary: dict,
+) -> pd.DataFrame:
+    """Fill standard project weather columns from a provider summary."""
+    fillable_columns = (
+        "avg_temperature_C",
+        "min_temperature_C",
+        "max_temperature_C",
+        "humidity_percent",
+    )
+
+    df = df.copy()
+    for column in fillable_columns:
+        df[column] = df[column].fillna(weather_summary[column])
     return df
 
 
 def clean_and_convert_types(
     df: pd.DataFrame,
+    numeric_columns: list[str],
+    weather_provider: str,
     use_mock_weather: bool,
+    openweathermap_config: dict | None = None,
 ) -> pd.DataFrame:
-    """
-    Veri temizleme ve tip dönüştürme işlemlerini yapar.
-
-    Yapılan işlemler:
-        - Eksik hava değerlerini mock API ile doldurur.
-        - Sayısal sütunları numeric tipe çevirir.
-        - Tarih sütunlarını datetime tipine çevirir.
-    """
-
+    """Clean raw data, fill missing weather values and convert column types."""
     df = df.copy()
 
-    if use_mock_weather:
-        enriched_rows = []
+    if "data_source" not in df.columns:
+        df["data_source"] = "real"
 
-        for _, row in df.iterrows():
-            enriched_row = enrich_missing_weather_values(row.to_dict())
-            enriched_rows.append(enriched_row)
+    if weather_provider == "mock" and use_mock_weather:
+        df = pd.DataFrame(
+            [enrich_missing_weather_values(row.to_dict()) for _, row in df.iterrows()]
+        )
+    elif weather_provider == "openweathermap":
+        if openweathermap_config is None:
+            raise ValueError("OpenWeatherMap config is required for openweathermap provider.")
+        df = _fill_missing_from_openweathermap(df, openweathermap_config)
+    elif weather_provider == "openmeteo":
+        df = _fill_missing_from_weather_summary(
+            df=df,
+            weather_summary=get_open_meteo_weather_data(load_params()["weather"]),
+        )
+    elif weather_provider != "none":
+        raise ValueError(
+            "Unsupported weather_provider. Use one of: mock, openmeteo, openweathermap, none."
+        )
 
-        df = pd.DataFrame(enriched_rows)
-
-    for column in NUMERIC_COLUMNS:
+    for column in numeric_columns:
         df[column] = pd.to_numeric(df[column], errors="coerce")
 
     df["planting_date"] = pd.to_datetime(df["planting_date"], errors="coerce")
     df["harvest_date"] = pd.to_datetime(df["harvest_date"], errors="coerce")
 
     if df["planting_date"].isna().any():
-        raise ValueError(
-            "planting_date sütununda dönüştürülemeyen tarih var. "
-            "Örnek doğru format: 2025-03-15"
-        )
+        raise ValueError("planting_date contains invalid dates. Example: 2025-03-15")
 
     if df["harvest_date"].isna().any():
-        raise ValueError(
-            "harvest_date sütununda dönüştürülemeyen tarih var. "
-            "Örnek doğru format: 2025-07-01"
-        )
+        raise ValueError("harvest_date contains invalid dates. Example: 2025-07-01")
 
     return df
 
 
-def create_features(
-    df: pd.DataFrame,
-    base_temp_c: float,
-) -> pd.DataFrame:
-    """
-    Ham sera verisinden yeni özellikler üretir.
-
-    Üretilen feature'lar:
-        - calculated_days_to_maturity
-        - gdd
-        - temperature_range_C
-        - total_fertilizer_kg_ha
-        - N_ratio
-        - P_ratio
-        - K_ratio
-        - light_exposure_index
-        - irrigation_per_day
-        - co2_light_interaction
-        - pest_health_score
-    """
-
+def create_features(df: pd.DataFrame, base_temp_c: float) -> pd.DataFrame:
+    """Create model-ready features from cleaned greenhouse data."""
     df = df.copy()
 
     df["calculated_days_to_maturity"] = (
@@ -200,9 +181,7 @@ def create_features(
         axis=1,
     )
 
-    df["temperature_range_C"] = (
-        df["max_temperature_C"] - df["min_temperature_C"]
-    )
+    df["temperature_range_C"] = df["max_temperature_C"] - df["min_temperature_C"]
 
     df["total_fertilizer_kg_ha"] = (
         df["fertilizer_N_kg_ha"]
@@ -211,35 +190,23 @@ def create_features(
     )
 
     safe_total_fertilizer = df["total_fertilizer_kg_ha"].replace(0, np.nan)
-
     df["N_ratio"] = df["fertilizer_N_kg_ha"] / safe_total_fertilizer
     df["P_ratio"] = df["fertilizer_P_kg_ha"] / safe_total_fertilizer
     df["K_ratio"] = df["fertilizer_K_kg_ha"] / safe_total_fertilizer
 
-    df["light_exposure_index"] = (
-        df["light_intensity_lux"] * df["photoperiod_hours"]
+    df["light_exposure_index"] = df["light_intensity_lux"] * df["photoperiod_hours"]
+    df["irrigation_per_day"] = df["irrigation_mm"] / df["days_to_maturity"].replace(
+        0, np.nan
     )
-
-    df["irrigation_per_day"] = (
-        df["irrigation_mm"] / df["days_to_maturity"].replace(0, np.nan)
-    )
-
-    df["co2_light_interaction"] = (
-        df["co2_ppm"] * df["light_intensity_lux"]
-    )
-
+    df["co2_light_interaction"] = df["co2_ppm"] * df["light_intensity_lux"]
     df["pest_health_score"] = 1 / (1 + df["pest_severity"])
 
     df = df.replace([np.inf, -np.inf], np.nan)
 
-    numeric_columns = df.select_dtypes(include=["number"]).columns
-
-    for column in numeric_columns:
+    for column in df.select_dtypes(include=["number"]).columns:
         df[column] = df[column].fillna(df[column].median())
 
-    text_columns = df.select_dtypes(include=["object"]).columns
-
-    for column in text_columns:
+    for column in df.select_dtypes(include=["object"]).columns:
         df[column] = df[column].fillna("unknown")
 
     return df
@@ -249,75 +216,75 @@ def save_feature_report(
     df_before: pd.DataFrame,
     df_after: pd.DataFrame,
     output_path: str | Path,
+    weather_provider: str,
 ) -> None:
-    """
-    Feature engineering sonucunda oluşan raporu JSON olarak kaydeder.
-    """
-
+    """Save a JSON report describing generated features."""
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    added_features = []
-
-    for column in df_after.columns:
-        if column not in df_before.columns:
-            added_features.append(column)
+    added_features = [
+        column for column in df_after.columns if column not in df_before.columns
+    ]
 
     report = {
         "raw_shape": list(df_before.shape),
         "processed_shape": list(df_after.shape),
+        "weather_provider": weather_provider,
+        "data_sources": sorted(df_after["data_source"].dropna().unique().tolist()),
         "added_feature_count": len(added_features),
         "added_features": added_features,
         "missing_values_after_processing": int(df_after.isna().sum().sum()),
     }
 
-    with open(output_path, "w", encoding="utf-8") as file:
+    with output_path.open("w", encoding="utf-8") as file:
         json.dump(report, file, indent=2, ensure_ascii=False)
 
 
 def main() -> None:
-    """
-    Feature engineering pipeline ana fonksiyonu.
-    """
-
+    """Run the feature engineering stage."""
     params = load_params()
+    schema = load_schema(params)
 
     raw_data_path = PROJECT_ROOT / params["paths"]["raw_data"]
     processed_data_path = PROJECT_ROOT / params["paths"]["processed_data"]
     feature_report_path = PROJECT_ROOT / params["paths"]["feature_report_output"]
 
-    base_temp_c = params["feature_engineering"]["tomato_base_temperature_C"]
-    use_mock_weather = params["feature_engineering"]["use_mock_weather_when_missing"]
+    feature_params = params["feature_engineering"]
+    base_temp_c = feature_params["tomato_base_temperature_C"]
+    weather_provider = feature_params.get("weather_provider", "mock")
+    use_mock_weather = feature_params["use_mock_weather_when_missing"]
+
+    required_columns = get_required_columns(schema)
+    numeric_columns = get_numeric_columns(schema)
 
     df_raw = read_dataset(raw_data_path)
-
-    validate_columns(df_raw)
+    validate_columns(df_raw, required_columns)
 
     df_clean = clean_and_convert_types(
         df=df_raw,
+        numeric_columns=numeric_columns,
+        weather_provider=weather_provider,
         use_mock_weather=use_mock_weather,
+        openweathermap_config=params.get("openweathermap"),
     )
 
-    df_features = create_features(
-        df=df_clean,
-        base_temp_c=base_temp_c,
-    )
+    df_features = create_features(df=df_clean, base_temp_c=base_temp_c)
 
     processed_data_path.parent.mkdir(parents=True, exist_ok=True)
-
     df_features.to_csv(processed_data_path, index=False)
 
     save_feature_report(
         df_before=df_raw,
         df_after=df_features,
         output_path=feature_report_path,
+        weather_provider=weather_provider,
     )
 
-    print("Feature engineering tamamlandı.")
-    print(f"Ham veri: {raw_data_path}")
-    print(f"İşlenmiş veri: {processed_data_path}")
-    print(f"Feature raporu: {feature_report_path}")
-    print(f"Üretilen satır/sütun: {df_features.shape}")
+    print("Feature engineering completed.")
+    print(f"Raw data: {raw_data_path}")
+    print(f"Processed data: {processed_data_path}")
+    print(f"Feature report: {feature_report_path}")
+    print(f"Generated rows/columns: {df_features.shape}")
 
 
 if __name__ == "__main__":

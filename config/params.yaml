@@ -1,10 +1,14 @@
 paths:
+  schema: config/schema.yaml
   raw_data: data/raw/greenhouse_data.csv
   processed_data: data/processed/greenhouse_features.csv
   model_output: models/random_forest_yield_model.joblib
+  harvest_model_output: models/xgboost_harvest_date_model.joblib
   metrics_output: reports/metrics.json
+  harvest_metrics_output: reports/harvest_metrics.json
   feature_report_output: reports/feature_report.json
   predictions_output: reports/predictions.csv
+  harvest_predictions_output: reports/harvest_predictions.csv
 
 mlflow:
   tracking_uri: sqlite:///C:/salkim_ai/mlflow.db
@@ -14,6 +18,7 @@ mlflow:
 
 feature_engineering:
   tomato_base_temperature_C: 10
+  weather_provider: mock
   use_mock_weather_when_missing: true
 
 weather:
@@ -23,6 +28,15 @@ weather:
   cache_expire_seconds: 3600
   retries: 5
   backoff_factor: 0.2
+
+openweathermap:
+  api_url: https://api.openweathermap.org/data/2.5/forecast
+  api_key_env: OPENWEATHERMAP_API_KEY
+  latitude: 40.8991
+  longitude: 31.1888
+  units: metric
+  cache_expire_seconds: 3600
+  timeout_seconds: 20
 
 training:
   target_column: yield_kg_per_m2
@@ -35,3 +49,16 @@ training:
     max_depth: null
     min_samples_split: 2
     min_samples_leaf: 1
+
+harvest_training:
+  target_column: days_to_maturity
+  test_size: 0.2
+  random_state: 42
+  model:
+    type: XGBRegressor
+    n_estimators: 300
+    max_depth: 4
+    learning_rate: 0.05
+    subsample: 0.9
+    colsample_bytree: 0.9
+    objective: reg:squarederror

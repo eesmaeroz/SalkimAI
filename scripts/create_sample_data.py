@@ -77,6 +77,7 @@ def create_sample_data(row_count: int = 150) -> pd.DataFrame:
 
         row = {
             "greenhouse_id": f"GH_{int(rng.integers(1, 11)):03d}",
+            "data_source": "synthetic",
             "crop_type": "tomato",
             "variety": rng.choice(varieties),
             "planting_date": planting_date.date().isoformat(),
