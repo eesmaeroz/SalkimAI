@@ -32,7 +32,7 @@ salkim_ai/
 │       │   ├── feature_engineering.py
 │       │   ├── gdd_calculator.py
 │       │   ├── openweathermap_client.py
-│       │   └── weather_api_mock.py
+│       │   └── weather_provider.py
 │       ├── training/
 │       │   ├── train_model.py
 │       │   └── train_harvest_model.py
@@ -51,8 +51,6 @@ salkim_ai/
 ├── requirements.txt
 ├── README.md
 ├── RUN_COMMANDS.md
-├── PROJECT_PLAN.md
-├── ARCHITECTURE_AUDIT.md
 └── PROJECT_DOCUMENTATION.md
 ```
 
@@ -79,7 +77,7 @@ Bu klasörlerdeki CSV çıktıları Git yerine DVC tarafından yönetilmelidir.
 Feature engineering ve hava verisi katmanıdır.
 
 - `gdd_calculator.py`: günlük ve kümülatif GDD hesaplama
-- `weather_api_mock.py`: deterministik offline hava verisi
+- `weather_provider.py`: deterministik offline hava verisi ve Open-Meteo JSON istemcisi
 - `openweathermap_client.py`: gerçek OpenWeatherMap istemcisi
 - `feature_engineering.py`: ham veriden model feature’ları üretme
 
@@ -426,7 +424,7 @@ daily.weather_code
 Canlı test:
 
 ```powershell
-python -m ml.prediction.features.weather_api_mock
+python -m ml.prediction.features.weather_provider
 ```
 
 Feature engineering içinde Open-Meteo kullanmak için:

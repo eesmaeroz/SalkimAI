@@ -1,6 +1,6 @@
 import pandas as pd
 
-from ml.prediction.features.weather_api_mock import summarize_open_meteo_forecast
+from ml.prediction.features.weather_provider import summarize_open_meteo_forecast
 
 
 def test_summarize_open_meteo_forecast_matches_json_shape():

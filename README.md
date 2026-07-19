@@ -17,12 +17,11 @@ Sera domates verimi ve hasat zamanı tahmini için tekrarlanabilir bir MLOps ör
 
 - `config/params.yaml`: pipeline ve model ayarları
 - `ml/prediction/features/gdd_calculator.py`: GDD hesaplama
-- `ml/prediction/features/weather_api_mock.py`: Open-Meteo + offline mock
+- `ml/prediction/features/weather_provider.py`: Open-Meteo + offline mock
 - `ml/prediction/features/openweathermap_client.py`: OpenWeatherMap entegrasyonu
 - `ml/prediction/features/feature_engineering.py`: feature üretimi
 - `ml/prediction/training/train_model.py`: Random Forest verim modeli
 - `ml/prediction/training/train_harvest_model.py`: XGBoost hasat zamanı modeli
-- `PROJECT_PLAN.md`: genel plan ve T1 kullanıcı görevleri
 
 Kurulum ve çalıştırma adımları için `RUN_COMMANDS.md` dosyasına bak.
 

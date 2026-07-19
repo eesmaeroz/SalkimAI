@@ -1,4 +1,4 @@
-"""Open-Meteo JSON client and deterministic offline weather mock.
+"""Weather providers: Open-Meteo JSON client and deterministic offline mock.
 
 The mock functions keep feature engineering repeatable in tests. The live
 Open-Meteo client uses the public JSON forecast endpoint, matching the curl

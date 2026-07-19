@@ -29,7 +29,7 @@ stages:
       size: 23513
     - path: ml/prediction/features/feature_engineering.py
       hash: md5
-      md5: 4bacffcf83c5f64ce135b8a09735e7c9
+      md5: 82f5491e371b6dc35b6ef8634fcdaf7c
       size: 9548
     - path: ml/prediction/features/gdd_calculator.py
       hash: md5
@@ -39,10 +39,10 @@ stages:
       hash: md5
       md5: fa3ce1e6c76e64a1810adb0a30a02ac0
       size: 4047
-    - path: ml/prediction/features/weather_api_mock.py
+    - path: ml/prediction/features/weather_provider.py
       hash: md5
-      md5: 00f15d2b4c0d22336a4bfdb42af5fd61
-      size: 7523
+      md5: 3274611087088fb28ad16f6193f20311
+      size: 7534
     params:
       config/params.yaml:
         feature_engineering.tomato_base_temperature_C: 10

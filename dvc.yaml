@@ -12,7 +12,7 @@ stages:
       - data/raw/greenhouse_data.csv
       - ml/prediction/features/feature_engineering.py
       - ml/prediction/features/gdd_calculator.py
-      - ml/prediction/features/weather_api_mock.py
+      - ml/prediction/features/weather_provider.py
       - ml/prediction/features/openweathermap_client.py
       - config/params.yaml
       - config/schema.yaml

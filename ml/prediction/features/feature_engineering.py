@@ -11,7 +11,7 @@ import yaml
 
 from ml.prediction.features.gdd_calculator import calculate_gdd
 from ml.prediction.features.openweathermap_client import get_openweathermap_weather_data
-from ml.prediction.features.weather_api_mock import (
+from ml.prediction.features.weather_provider import (
     enrich_missing_weather_values,
     get_open_meteo_weather_data,
 )

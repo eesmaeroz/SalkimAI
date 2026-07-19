@@ -2,7 +2,7 @@ from ml.prediction.features.gdd_calculator import (
     calculate_gdd,
     calculate_cumulative_gdd,
 )
-from ml.prediction.features.weather_api_mock import get_mock_weather_data
+from ml.prediction.features.weather_provider import get_mock_weather_data
 
 
 def test_calculate_gdd_positive():

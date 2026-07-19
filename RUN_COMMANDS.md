@@ -38,7 +38,7 @@ python -m ml.prediction.features.openweathermap_client
 Open-Meteo API key istemez ve JSON endpoint üzerinden çalışır.
 
 ```powershell
-python -m ml.prediction.features.weather_api_mock
+python -m ml.prediction.features.weather_provider
 ```
 
 Feature engineering içinde Open-Meteo kullanmak için `config/params.yaml` içinde:
