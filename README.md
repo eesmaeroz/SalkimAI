@@ -60,3 +60,23 @@ SalkımAI/
 ├── Sprint1/        # Sprint Belgeleri
 └── README.md
 ```
+
+
+## Sprint 2 Özeti
+| Görev | Durum |
+|-------|-------|
+| Flutter mobil uygulama | ✅ Tamamlandı |
+| XGBoost yield ve maturity modelleri | ✅ Tamamlandı |
+| ML pipeline | ✅ Tamamlandı |
+| Backend main'e merge | ✅ Tamamlandı |
+| Prometheus metrics + Kubernetes | ✅ Tamamlandı |
+| API deploy | 🔄 Sprint 3'e taşındı |
+| Flutter gerçek API bağlantısı | 🔄 Sprint 3'e taşındı |
+
+## Sprint 2 Belgeleri
+Sprint2 klasöründe aşağıdaki belgeler mevcuttur:
+- Daily Scrum Notları
+- Sprint Review
+- Sprint Retro
+- Sprint Board
+- Ürün Durumu
