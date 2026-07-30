@@ -7,12 +7,13 @@ Salkım AI — Celery Worker (Refactored)
   3. Dosyayı sil → DB'ye hiçbir şey yazılmıyor!
 
 YENİ AKIŞ (Doğru):
-  1. Dosyayı MinIO "raw-images" bucket'ına upload et
-  2. full_analysis(image_path) çağır
-  3. Sonucu PostgreSQL analyses tablosuna yaz
-  4. images tablosundaki kaydı güncelle (minio_url, status=completed)
-  5. Geçici dosyayı sil
-  6. Sonucu return et
+  1. FastAPI dosyayı zaten MinIO "raw-images" bucket'ına yüklemiş durumda
+  2. Worker dosyayı MinIO'dan indirir (ayrı konteyner olduğu için)
+  3. full_analysis(image_path) çağır
+  4. Sonucu PostgreSQL analyses tablosuna yaz
+  5. images tablosundaki kaydı güncelle (minio_url, status=completed)
+  6. Geçici dosyayı sil
+  7. Sonucu return et
 """
 
 import os
@@ -36,6 +37,7 @@ from apps.api.models.image import Image
 from apps.api.models.analysis import Analysis
 from apps.api.services.storage import (
     upload_file,
+    download_file,
     ensure_buckets,
     BUCKET_RAW_IMAGES,
 )
@@ -72,24 +74,30 @@ def run_full_analysis_task(self, image_id: str, image_path: str, original_filena
 
     Args:
         image_id: PostgreSQL images tablosundaki UUID (string)
-        image_path: Geçici dosya yolu
+        image_path: MinIO object adı (FastAPI zaten yükledi)
         original_filename: Orijinal dosya adı
     """
     db: Session = SessionLocal()
     start_time = time.time()
-    
+    local_image_path = None
+
     try:
         # 0. MinIO bucket'larını garanti et
         ensure_buckets()
 
-        # 1. Fotoğrafı MinIO'ya yükle
-        minio_object_name = f"{image_id}/{original_filename}"
-        minio_url = upload_file(
+        # 1. Fotoğrafı MinIO'dan indir (FastAPI zaten yükledi, image_path artık MinIO object adı)
+        minio_object_name = image_path
+        local_temp_dir = f"/tmp/salkim_worker_{image_id}"
+        os.makedirs(local_temp_dir, exist_ok=True)
+        local_image_path = os.path.join(local_temp_dir, original_filename)
+        download_file(
             bucket=BUCKET_RAW_IMAGES,
             object_name=minio_object_name,
-            file_path=image_path,
+            file_path=local_image_path,
         )
-        logger.info(f"[CELERY] MinIO'ya yüklendi: {minio_url}")
+        minio_url = f"{BUCKET_RAW_IMAGES}/{minio_object_name}"
+        image_path = local_image_path
+        logger.info(f"[CELERY] MinIO'dan indirildi: {minio_url}")
 
         # 2. ML inference çalıştır
         logger.info(f"[CELERY] ML analizi başlatılıyor: {image_path}")
@@ -121,7 +129,7 @@ def run_full_analysis_task(self, image_id: str, image_path: str, original_filena
             disease_map = {0: "healthy", 1: "early_blight", 2: "late_blight", 3: "pest", 4: "mosaic"}
             analysis_record.disease_class = disease_map.get(dominant_disease, f"class_{dominant_disease}")
             analysis_record.disease_prob = disease_classes.count(dominant_disease) / len(disease_classes)
-            
+
             # Prometheus metrik güncelle
             risk_level = "low"
             if analysis_record.disease_prob > 0.70:
@@ -144,7 +152,6 @@ def run_full_analysis_task(self, image_id: str, image_path: str, original_filena
         # 5. Geçici dosyayı sil
         if os.path.exists(image_path):
             os.remove(image_path)
-            # Geçici dizini de temizle
             temp_dir = os.path.dirname(image_path)
             if os.path.isdir(temp_dir) and not os.listdir(temp_dir):
                 os.rmdir(temp_dir)
@@ -170,8 +177,8 @@ def run_full_analysis_task(self, image_id: str, image_path: str, original_filena
             db.rollback()
 
         # Geçici dosyayı temizle
-        if os.path.exists(image_path):
-            os.remove(image_path)
+        if local_image_path and os.path.exists(local_image_path):
+            os.remove(local_image_path)
 
         raise self.retry(exc=exc, countdown=30)
 
