@@ -23,6 +23,11 @@ from apps.api.models.image import Image
 from apps.api.models.analysis import Analysis
 from apps.api.services.auth import get_current_user
 from apps.api.celery_worker import run_full_analysis_task
+from apps.api.services.storage import (
+    upload_image as minio_upload_image,
+    ensure_buckets,
+    BUCKET_RAW_IMAGES,
+)
 
 router = APIRouter(tags=["images"])
 
@@ -69,27 +74,21 @@ async def upload_image(
     db: Session = Depends(get_db),
 ):
     """
-    Kullanıcıdan gelen fotoğrafı alır, DB'de kayıt oluşturur
-    ve Celery worker'a analiz görevi gönderir.
+    Kullanıcıdan gelen fotoğrafı alır, DB'de kayıt oluşturur,
+    fotoğrafı MinIO'ya yükler ve Celery worker'a analiz görevi gönderir.
+
+    NOT: FastAPI ve Celery worker ayrı konteynerlerde çalıştığı için
+    dosya artık yerel /tmp yerine MinIO üzerinden paylaşılıyor.
 
     Akış:
-      1. Dosyayı geçici dizine yaz
-      2. DB'de images kaydı oluştur (status=pending)
-      3. Celery task'ına image_id ve geçici path ver
+      1. DB'de images kaydı oluştur (status=pending)
+      2. Fotoğrafı MinIO'ya yükle
+      3. Celery task'ına image_id ve MinIO object adını ver
       4. Client'a image_id döndür
     """
     print(f"\n[API] Kullanıcı {user.phone} fotoğraf yükledi: {file.filename}")
 
-    # 1. Dosyayı geçici dizine yaz
-    file_content = await file.read()
-    temp_dir = tempfile.mkdtemp(prefix="salkim_")
-    safe_filename = f"{uuid.uuid4()}_{file.filename}"
-    temp_path = os.path.join(temp_dir, safe_filename)
-
-    with open(temp_path, "wb") as buffer:
-        buffer.write(file_content)
-
-    # 2. DB'de images kaydı oluştur
+    # 1. DB'de images kaydı oluştur
     image_record = Image(
         original_filename=file.filename,
         status="pending",
@@ -98,10 +97,21 @@ async def upload_image(
     db.commit()
     db.refresh(image_record)
 
-    # 3. Celery task'ını başlat — image_id ve geçici path gönder
+    # 2. Dosyayı direkt MinIO'ya yükle (worker ayrı konteyner olduğu için)
+    file_content = await file.read()
+    ensure_buckets()
+    safe_filename = f"{uuid.uuid4()}_{file.filename}"
+    minio_object_name = f"{image_record.id}/{safe_filename}"
+    minio_upload_image(
+        bucket=BUCKET_RAW_IMAGES,
+        object_name=minio_object_name,
+        data=file_content,
+    )
+
+    # 3. Celery task'ını başlat — image_id ve MinIO object adını gönder
     task = run_full_analysis_task.delay(
         str(image_record.id),
-        temp_path,
+        minio_object_name,
         file.filename,
     )
 
