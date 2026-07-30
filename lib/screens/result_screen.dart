@@ -13,7 +13,7 @@ class ResultScreen extends StatefulWidget {
 
 class _ResultScreenState extends State<ResultScreen> {
   static const String _baseUrl = 'https://salkimai-production.up.railway.app';
-  static const String _testPhone = '05553972301';
+  static const String _testPhone = '0533 397 23 01';
   static const String _testPassword = 'Test1234!';
 
   bool _isLoading = true;
