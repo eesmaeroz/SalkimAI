@@ -145,7 +145,7 @@ def delete_object(bucket: str, object_name: str) -> None:
     client = get_minio_client()
     client.remove_object(bucket_name=bucket, object_name=object_name)
     logger.info(f"MinIO'dan silindi: {bucket}/{object_name}")
-  def download_file(bucket: str, object_name: str, file_path: str) -> None:
+def download_file(bucket: str, object_name: str, file_path: str) -> None:
     """MinIO'dan dosyayı yerel yola indirir."""
     client = get_minio_client()
     client.fget_object(
