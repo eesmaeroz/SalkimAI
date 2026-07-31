@@ -120,8 +120,13 @@ def clean_and_convert_types(
     weather_provider: str,
     use_mock_weather: bool,
     openweathermap_config: dict | None = None,
+    require_labels: bool = True,
 ) -> pd.DataFrame:
-    """Clean raw data, fill missing weather values and convert column types."""
+    """Clean raw data, fill missing weather values and convert column types.
+
+    When ``require_labels`` is False (inference), ``harvest_date``,
+    ``days_to_maturity`` and ``yield_kg_per_m2`` may be missing or invalid.
+    """
     df = df.copy()
 
     if "data_source" not in df.columns:
@@ -145,29 +150,53 @@ def clean_and_convert_types(
             "Unsupported weather_provider. Use one of: mock, openmeteo, openweathermap, none."
         )
 
-    for column in numeric_columns:
+    present_numeric = [column for column in numeric_columns if column in df.columns]
+    for column in present_numeric:
         df[column] = pd.to_numeric(df[column], errors="coerce")
 
+    if "planting_date" not in df.columns:
+        raise ValueError("planting_date is required.")
     df["planting_date"] = pd.to_datetime(df["planting_date"], errors="coerce")
-    df["harvest_date"] = pd.to_datetime(df["harvest_date"], errors="coerce")
-
     if df["planting_date"].isna().any():
         raise ValueError("planting_date contains invalid dates. Example: 2025-03-15")
 
-    if df["harvest_date"].isna().any():
+    if "harvest_date" in df.columns:
+        df["harvest_date"] = pd.to_datetime(df["harvest_date"], errors="coerce")
+    elif require_labels:
+        raise ValueError("harvest_date is required for training feature engineering.")
+    else:
+        df["harvest_date"] = pd.NaT
+
+    if require_labels and df["harvest_date"].isna().any():
         raise ValueError("harvest_date contains invalid dates. Example: 2025-07-01")
 
     return df
 
 
-def create_features(df: pd.DataFrame, base_temp_c: float) -> pd.DataFrame:
-    """Create model-ready features from cleaned greenhouse data."""
+def create_features(
+    df: pd.DataFrame,
+    base_temp_c: float,
+    planned_cycle_days: float = 90.0,
+) -> pd.DataFrame:
+    """Create model-ready features from cleaned greenhouse data.
+
+    ``irrigation_per_day`` uses ``planned_cycle_days`` (not the maturity target)
+    so harvest models cannot reconstruct ``days_to_maturity`` from features.
+    """
     df = df.copy()
+    planned_days = float(planned_cycle_days)
+    if planned_days <= 0:
+        raise ValueError("planned_cycle_days must be positive.")
 
-    df["calculated_days_to_maturity"] = (
-        df["harvest_date"] - df["planting_date"]
-    ).dt.days
+    if "harvest_date" in df.columns and df["harvest_date"].notna().any():
+        df["calculated_days_to_maturity"] = (
+            df["harvest_date"] - df["planting_date"]
+        ).dt.days
+    else:
+        df["calculated_days_to_maturity"] = np.nan
 
+    if "days_to_maturity" not in df.columns:
+        df["days_to_maturity"] = np.nan
     df["days_to_maturity"] = df["days_to_maturity"].fillna(
         df["calculated_days_to_maturity"]
     )
@@ -195,15 +224,15 @@ def create_features(df: pd.DataFrame, base_temp_c: float) -> pd.DataFrame:
     df["K_ratio"] = df["fertilizer_K_kg_ha"] / safe_total_fertilizer
 
     df["light_exposure_index"] = df["light_intensity_lux"] * df["photoperiod_hours"]
-    df["irrigation_per_day"] = df["irrigation_mm"] / df["days_to_maturity"].replace(
-        0, np.nan
-    )
+    df["irrigation_per_day"] = df["irrigation_mm"] / planned_days
     df["co2_light_interaction"] = df["co2_ppm"] * df["light_intensity_lux"]
     df["pest_health_score"] = 1 / (1 + df["pest_severity"])
 
     df = df.replace([np.inf, -np.inf], np.nan)
 
     for column in df.select_dtypes(include=["number"]).columns:
+        if column in {"days_to_maturity", "calculated_days_to_maturity", "yield_kg_per_m2"}:
+            continue
         df[column] = df[column].fillna(df[column].median())
 
     for column in df.select_dtypes(include=["object"]).columns:
@@ -211,6 +240,40 @@ def create_features(df: pd.DataFrame, base_temp_c: float) -> pd.DataFrame:
 
     return df
 
+
+def prepare_inference_features(df: pd.DataFrame, params: dict | None = None) -> pd.DataFrame:
+    """Build model features for unlabeled plantings (no harvest_date required)."""
+    params = params or load_params()
+    schema = load_schema(params)
+    feature_params = params["feature_engineering"]
+
+    inference_required = [
+        column
+        for column in get_required_columns(schema)
+        if column
+        not in {"harvest_date", "days_to_maturity", "yield_kg_per_m2"}
+    ]
+    validate_columns(df, inference_required)
+
+    numeric_columns = [
+        column
+        for column in get_numeric_columns(schema)
+        if column in df.columns or column not in {"days_to_maturity", "yield_kg_per_m2"}
+    ]
+
+    cleaned = clean_and_convert_types(
+        df=df,
+        numeric_columns=numeric_columns,
+        weather_provider=feature_params.get("weather_provider", "mock"),
+        use_mock_weather=feature_params["use_mock_weather_when_missing"],
+        openweathermap_config=params.get("openweathermap"),
+        require_labels=False,
+    )
+    return create_features(
+        df=cleaned,
+        base_temp_c=feature_params["tomato_base_temperature_C"],
+        planned_cycle_days=feature_params.get("planned_cycle_days", 90),
+    )
 
 def save_feature_report(
     df_before: pd.DataFrame,
@@ -251,6 +314,7 @@ def main() -> None:
 
     feature_params = params["feature_engineering"]
     base_temp_c = feature_params["tomato_base_temperature_C"]
+    planned_cycle_days = feature_params.get("planned_cycle_days", 90)
     weather_provider = feature_params.get("weather_provider", "mock")
     use_mock_weather = feature_params["use_mock_weather_when_missing"]
 
@@ -266,9 +330,14 @@ def main() -> None:
         weather_provider=weather_provider,
         use_mock_weather=use_mock_weather,
         openweathermap_config=params.get("openweathermap"),
+        require_labels=True,
     )
 
-    df_features = create_features(df=df_clean, base_temp_c=base_temp_c)
+    df_features = create_features(
+        df=df_clean,
+        base_temp_c=base_temp_c,
+        planned_cycle_days=planned_cycle_days,
+    )
 
     processed_data_path.parent.mkdir(parents=True, exist_ok=True)
     df_features.to_csv(processed_data_path, index=False)

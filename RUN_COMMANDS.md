@@ -56,12 +56,30 @@ dvc repro make_features
 
 ## 4. XGBoost hasat zamanı modeli
 
-Önce `xgboost` kurulu olmalı.
-
 ```powershell
 dvc repro train_harvest
+dvc repro predict_harvest
 dvc metrics show
 ```
+
+## 4.1 LSTM + Ensemble hasat modeli
+
+TensorFlow kurulu olmalı (`requirements.txt` içinde).
+
+```powershell
+dvc repro make_sequences
+dvc repro train_lstm
+dvc repro train_ensemble
+dvc repro predict_harvest_ensemble
+dvc metrics show
+```
+
+Öneri: üretim hasat tahmini için ensemble çıktısını kullanın
+(`reports/ensemble_harvest_predictions.csv`).
+
+Etiketsiz yeni ekim satırları için `harvest_date` / `days_to_maturity` olmadan
+CSV verip tahmin scriptlerine path geçebilirsiniz; feature engineering inference
+modunda çalışır.
 
 ## 5. MLflow UI
 

@@ -8,22 +8,27 @@ import joblib
 import pandas as pd
 import yaml
 
+from ml.prediction.features.feature_engineering import prepare_inference_features
+from ml.prediction.training.maturity_common import HARVEST_DROP_COLUMNS
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 PARAMS_PATH = PROJECT_ROOT / "config" / "params.yaml"
 
-DROP_COLUMNS = [
-    "yield_kg_per_m2",
-    "days_to_maturity",
-    "planting_date",
-    "harvest_date",
-    "calculated_days_to_maturity",
-]
+DROP_COLUMNS = HARVEST_DROP_COLUMNS
 
 
 def load_params() -> dict:
     with PARAMS_PATH.open("r", encoding="utf-8") as file:
         return yaml.safe_load(file)
+
+
+def _load_feature_frame(input_csv_path: Path, params: dict) -> pd.DataFrame:
+    df = pd.read_csv(input_csv_path)
+    # Processed training tables already contain engineered columns.
+    if {"gdd", "light_exposure_index", "irrigation_per_day"}.issubset(df.columns):
+        return df
+    return prepare_inference_features(df, params=params)
 
 
 def predict_harvest_dates(
@@ -45,7 +50,7 @@ def predict_harvest_dates(
             "Run dvc repro train_harvest after installing xgboost."
         )
 
-    df = pd.read_csv(input_csv_path)
+    df = _load_feature_frame(Path(input_csv_path), params)
     if "planting_date" not in df.columns:
         raise ValueError("Input data must contain planting_date.")
 

@@ -10,8 +10,11 @@ __pycache__/
 # Generated pipeline data and artifacts
 data/raw/greenhouse_data.csv
 data/processed/greenhouse_features.csv
+data/processed/maturity_sequences.npz
 models/
 reports/
+.pytest_tmp*/
+.pytest_tmp_ensemble/
 
 # MLflow local tracking store
 mlflow.db

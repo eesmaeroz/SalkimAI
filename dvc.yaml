@@ -24,6 +24,7 @@ stages:
     params:
       - config/params.yaml:
           - feature_engineering.tomato_base_temperature_C
+          - feature_engineering.planned_cycle_days
           - feature_engineering.weather_provider
           - feature_engineering.use_mock_weather_when_missing
           - weather
@@ -51,6 +52,7 @@ stages:
     deps:
       - data/processed/greenhouse_features.csv
       - ml/prediction/training/train_harvest_model.py
+      - ml/prediction/training/maturity_common.py
       - config/params.yaml
     outs:
       - models/xgboost_harvest_date_model.joblib
@@ -60,6 +62,71 @@ stages:
     params:
       - config/params.yaml:
           - harvest_training
+          - maturity_split
+          - mlflow.experiment_name
+
+  make_sequences:
+    cmd: python -m ml.prediction.features.timeseries_builder
+    deps:
+      - data/processed/greenhouse_features.csv
+      - ml/prediction/features/timeseries_builder.py
+      - ml/prediction/features/gdd_calculator.py
+      - ml/prediction/features/weather_provider.py
+      - config/params.yaml
+    outs:
+      - data/processed/maturity_sequences.npz
+    params:
+      - config/params.yaml:
+          - lstm_training.lookback
+          - lstm_training.target_column
+          - feature_engineering.tomato_base_temperature_C
+
+  train_lstm:
+    cmd: python -m ml.prediction.training.train_lstm_maturity
+    deps:
+      - data/processed/maturity_sequences.npz
+      - data/processed/greenhouse_features.csv
+      - ml/prediction/training/train_lstm_maturity.py
+      - ml/prediction/training/maturity_common.py
+      - ml/prediction/features/timeseries_builder.py
+      - config/params.yaml
+    outs:
+      - models/lstm_maturity_model.keras
+      - models/lstm_maturity_scaler.joblib
+    metrics:
+      - reports/lstm_metrics.json:
+          cache: false
+    params:
+      - config/params.yaml:
+          - lstm_training
+          - maturity_split
+          - mlflow.experiment_name
+
+  train_ensemble:
+    cmd: python -m ml.prediction.training.train_ensemble
+    deps:
+      - data/processed/greenhouse_features.csv
+      - models/xgboost_harvest_date_model.joblib
+      - models/lstm_maturity_model.keras
+      - models/lstm_maturity_scaler.joblib
+      - ml/prediction/training/train_ensemble.py
+      - ml/prediction/training/train_harvest_model.py
+      - ml/prediction/training/train_lstm_maturity.py
+      - ml/prediction/training/maturity_common.py
+      - ml/prediction/features/timeseries_builder.py
+      - ml/prediction/calibration/calibrate_maturity.py
+      - config/params.yaml
+    outs:
+      - models/maturity_ensemble.joblib
+    metrics:
+      - reports/ensemble_metrics.json:
+          cache: false
+    params:
+      - config/params.yaml:
+          - ensemble
+          - harvest_training
+          - lstm_training
+          - maturity_split
           - mlflow.experiment_name
 
   predict_harvest:
@@ -68,6 +135,27 @@ stages:
       - data/processed/greenhouse_features.csv
       - models/xgboost_harvest_date_model.joblib
       - ml/prediction/inference/predict_harvest_date.py
+      - ml/prediction/training/maturity_common.py
+      - ml/prediction/features/feature_engineering.py
       - config/params.yaml
     outs:
       - reports/harvest_predictions.csv
+
+  predict_harvest_ensemble:
+    cmd: python -m ml.prediction.inference.predict_harvest_ensemble
+    deps:
+      - data/processed/greenhouse_features.csv
+      - models/maturity_ensemble.joblib
+      - models/xgboost_harvest_date_model.joblib
+      - models/lstm_maturity_model.keras
+      - models/lstm_maturity_scaler.joblib
+      - ml/prediction/inference/predict_harvest_ensemble.py
+      - ml/prediction/training/train_ensemble.py
+      - ml/prediction/training/train_lstm_maturity.py
+      - ml/prediction/training/maturity_common.py
+      - ml/prediction/features/timeseries_builder.py
+      - ml/prediction/features/feature_engineering.py
+      - ml/prediction/calibration/calibrate_maturity.py
+      - config/params.yaml
+    outs:
+      - reports/ensemble_harvest_predictions.csv

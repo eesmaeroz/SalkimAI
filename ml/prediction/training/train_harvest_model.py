@@ -18,21 +18,21 @@ import yaml
 from mlflow.models import infer_signature
 from sklearn.compose import ColumnTransformer
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
+
+
+from ml.prediction.training.maturity_common import (
+    HARVEST_DROP_COLUMNS,
+    maturity_split_params,
+    split_maturity_indices,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 PARAMS_PATH = PROJECT_ROOT / "config" / "params.yaml"
 
-DROP_COLUMNS = [
-    "yield_kg_per_m2",
-    "days_to_maturity",
-    "planting_date",
-    "harvest_date",
-    "calculated_days_to_maturity",
-]
+DROP_COLUMNS = HARVEST_DROP_COLUMNS
 
 
 def load_params() -> dict:
@@ -131,12 +131,14 @@ def main() -> None:
     df = load_training_data(data_path)
     X, y = split_features_and_target(df, harvest_params["target_column"])
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X,
-        y,
-        test_size=harvest_params["test_size"],
-        random_state=harvest_params["random_state"],
+    split_params = maturity_split_params(params)
+    train_idx, test_idx = split_maturity_indices(
+        n_samples=len(X),
+        test_size=split_params["test_size"],
+        random_state=split_params["random_state"],
     )
+    X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
+    y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
 
     model = build_model(params, X)
 

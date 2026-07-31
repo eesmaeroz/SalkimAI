@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from ml.prediction.features.feature_engineering import (
     clean_and_convert_types,
@@ -108,8 +109,22 @@ def test_create_features_adds_expected_columns():
         weather_provider="none",
         use_mock_weather=False,
     )
-    featured = create_features(cleaned, base_temp_c=10)
+    featured = create_features(cleaned, base_temp_c=10, planned_cycle_days=90)
 
     assert "gdd" in featured.columns
     assert "light_exposure_index" in featured.columns
     assert featured.loc[0, "gdd"] == 12
+    # irrigation_per_day must use planned cycle length, not the maturity target
+    assert featured.loc[0, "irrigation_per_day"] == 240 / 90
+
+
+def test_prepare_inference_features_without_harvest_labels():
+    from ml.prediction.features.feature_engineering import prepare_inference_features
+
+    row = _sample_df().drop(columns=["harvest_date", "days_to_maturity", "yield_kg_per_m2"])
+    featured = prepare_inference_features(row)
+
+    assert "gdd" in featured.columns
+    assert "irrigation_per_day" in featured.columns
+    assert pd.isna(featured.loc[0, "days_to_maturity"])
+    assert featured.loc[0, "irrigation_per_day"] == pytest.approx(240 / 90)
