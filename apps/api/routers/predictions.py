@@ -1,18 +1,18 @@
 """
 Salkım AI — Predictions (Tahminleme) Router'ı
 
-Doküman 2.4 (Faz 2, Gün 15–17) — T2 görevi:
-  POST /api/v1/predictions/harvest       → Hasat tarihi tahmini iste
-  POST /api/v1/predictions/disease_risk  → Hastalık risk tahmini iste
-  GET  /api/v1/predictions/{greenhouse_id}/history  → Geçmiş tahminler
-
-Tüm endpoint'ler JWT ile korunur.
-Tahmin sonuçları PostgreSQL'e kalıcı olarak yazılır.
+  POST /api/v1/predictions/harvest          → Hasat + rekolte (ensemble tercih)
+  POST /api/v1/predictions/harvest/ensemble → XGBoost+LSTM ensemble detaylı
+  GET  /api/v1/predictions/weather          → Open-Meteo şehir hava durumu
+  POST /api/v1/predictions/disease_risk     → Hastalık riski
+  GET  /api/v1/predictions/{greenhouse_id}/history
 """
+
+from __future__ import annotations
 
 import uuid
 from datetime import date, datetime
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
@@ -23,18 +23,23 @@ from apps.api.models.greenhouse import Greenhouse
 from apps.api.models.prediction import HarvestPrediction
 from apps.api.models.user import User
 from apps.api.services.auth import get_current_user
-from apps.api.services.prediction import predict_harvest, predict_disease_risk
 from apps.api.services.metrics import HARVEST_PREDICTIONS_TOTAL
+from apps.api.services.prediction import (
+    predict_disease_risk,
+    predict_harvest,
+    predict_weather,
+)
 
 router = APIRouter(tags=["predictions"])
 
-
-# --- Pydantic Şemaları ---
 
 class HarvestPredictionRequest(BaseModel):
     greenhouse_id: uuid.UUID
     crop_type: str = Field(..., description="Bitki türü, örn: Tomato")
     variety: str = Field(..., description="Çeşit, örn: Beefsteak")
+    planting_date: Optional[date] = Field(
+        None, description="Ekim tarihi (yoksa bugün). Hasat tarihi buna göre hesaplanır."
+    )
     avg_temperature_C: float = Field(..., description="Ortalama sıcaklık")
     min_temperature_C: float = Field(..., description="Min sıcaklık")
     max_temperature_C: float = Field(..., description="Max sıcaklık")
@@ -48,6 +53,10 @@ class HarvestPredictionRequest(BaseModel):
     fertilizer_K_kg_ha: float = Field(..., description="Gübre K miktarı")
     pest_severity: float = Field(..., description="Zararlı seviyesi")
     soil_pH: float = Field(..., description="Toprak pH")
+    use_ensemble: bool = Field(
+        True,
+        description="True: XGBoost+LSTM ensemble (varsa). False: sadece XGBoost/legacy.",
+    )
 
 
 class HarvestPredictionResponse(BaseModel):
@@ -59,8 +68,34 @@ class HarvestPredictionResponse(BaseModel):
     confidence_score: Optional[float]
     model_version: Optional[str]
     created_at: datetime
+    details: Optional[Dict[str, Any]] = None
 
     model_config = {"from_attributes": True}
+
+
+class EnsembleHarvestResponse(BaseModel):
+    prediction_id: uuid.UUID
+    greenhouse_id: uuid.UUID
+    planting_date: Optional[date]
+    predicted_harvest_date: Optional[date]
+    predicted_days_remaining: Optional[int]
+    predicted_days_xgb: Optional[int] = None
+    predicted_days_lstm: Optional[int] = None
+    predicted_days_ensemble_raw: Optional[int] = None
+    predicted_yield_kg_m2: Optional[float]
+    confidence_score: Optional[float]
+    model_version: Optional[str]
+    created_at: datetime
+
+
+class WeatherResponse(BaseModel):
+    sehir: Optional[str]
+    il: Optional[str]
+    ulke: Optional[str]
+    koordinatlar: Dict[str, Any]
+    guncel: Dict[str, Any]
+    tahmin: List[Dict[str, Any]]
+    summary: Optional[Dict[str, Any]] = None
 
 
 class DiseaseRiskRequest(BaseModel):
@@ -72,8 +107,10 @@ class DiseaseRiskRequest(BaseModel):
         None, ge=-10, le=60, description="Son 7 günlük ortalama sıcaklık (°C)"
     )
     disease_prob_from_vision: Optional[float] = Field(
-        None, ge=0, le=1,
-        description="Görüntü analizinden gelen hastalık olasılığı (Esma+Dilan'ın Vision servisi)"
+        None,
+        ge=0,
+        le=1,
+        description="Görüntü analizinden gelen hastalık olasılığı (Vision servisi)",
     )
 
 
@@ -86,13 +123,17 @@ class DiseaseRiskResponse(BaseModel):
     model_version: str
 
 
-# --- Yardımcı ---
-
-def _verify_greenhouse_owner(greenhouse_id: uuid.UUID, user: User, db: Session) -> Greenhouse:
-    gh = db.query(Greenhouse).filter(
-        Greenhouse.id == greenhouse_id,
-        Greenhouse.user_id == user.id,
-    ).first()
+def _verify_greenhouse_owner(
+    greenhouse_id: uuid.UUID, user: User, db: Session
+) -> Greenhouse:
+    gh = (
+        db.query(Greenhouse)
+        .filter(
+            Greenhouse.id == greenhouse_id,
+            Greenhouse.user_id == user.id,
+        )
+        .first()
+    )
     if not gh:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -101,20 +142,15 @@ def _verify_greenhouse_owner(greenhouse_id: uuid.UUID, user: User, db: Session) 
     return gh
 
 
-# --- Endpoint'ler ---
-
-@router.post(
-    "/harvest",
-    response_model=HarvestPredictionResponse,
-    status_code=status.HTTP_201_CREATED,
-    summary="Hasat Tarihi ve Rekolte Tahmini",
-)
-def create_harvest_prediction(
+def _run_and_persist_harvest(
     request: HarvestPredictionRequest,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
+    current_user: User,
+    db: Session,
+    *,
+    force_ensemble: bool | None = None,
+) -> tuple[HarvestPrediction, dict]:
     gh = _verify_greenhouse_owner(request.greenhouse_id, current_user, db)
+    use_ensemble = request.use_ensemble if force_ensemble is None else force_ensemble
 
     prediction_result = predict_harvest(
         crop_type=request.crop_type,
@@ -132,32 +168,132 @@ def create_harvest_prediction(
         fertilizer_K_kg_ha=request.fertilizer_K_kg_ha,
         pest_severity=request.pest_severity,
         soil_pH=request.soil_pH,
+        planting_date=request.planting_date,
+        greenhouse_id=str(gh.id),
+        use_ensemble=use_ensemble,
     )
 
     pred = HarvestPrediction(
         greenhouse_id=gh.id,
-        gdd_accumulated=0.0, # Not used in new model but kept for DB compat
+        gdd_accumulated=0.0,
         days_since_planting=0,
         predicted_harvest_date=prediction_result["predicted_harvest_date"],
         predicted_days_remaining=prediction_result["predicted_days_remaining"],
         predicted_yield_kg_m2=prediction_result["predicted_yield_kg_m2"],
         confidence_score=prediction_result["confidence_score"],
         model_version=prediction_result["model_version"],
+        raw_features={
+            "planting_date": prediction_result.get("planting_date"),
+            "details": prediction_result.get("details") or {},
+            "use_ensemble": use_ensemble,
+        },
     )
     db.add(pred)
     db.commit()
-
-    # Prometheus metric güncelle
+    db.refresh(pred)
     HARVEST_PREDICTIONS_TOTAL.inc()
+    return pred, prediction_result
 
+
+@router.post(
+    "/harvest",
+    response_model=HarvestPredictionResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Hasat Tarihi ve Rekolte Tahmini",
+    description=(
+        "Mobil / genel istemciler için ana hasat endpoint'i. "
+        "Varsayılan olarak XGBoost+LSTM ensemble + calibration kullanır; "
+        "artefact yoksa XGBoost veya legacy modele düşer."
+    ),
+)
+def create_harvest_prediction(
+    request: HarvestPredictionRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    pred, result = _run_and_persist_harvest(request, current_user, db)
     return HarvestPredictionResponse(
-        prediction_id=prediction.id,
-        greenhouse_id=prediction.greenhouse_id,
-        predicted_harvest_date=prediction.predicted_harvest_date,
-        predicted_days_remaining=prediction.predicted_days_remaining,
-        confidence_score=prediction.confidence_score,
-        model_version=prediction.model_version,
-        created_at=prediction.created_at,
+        prediction_id=pred.id,
+        greenhouse_id=pred.greenhouse_id,
+        predicted_harvest_date=pred.predicted_harvest_date,
+        predicted_days_remaining=pred.predicted_days_remaining,
+        predicted_yield_kg_m2=pred.predicted_yield_kg_m2,
+        confidence_score=pred.confidence_score,
+        model_version=pred.model_version,
+        created_at=pred.created_at,
+        details=result.get("details") or {},
+    )
+
+
+@router.post(
+    "/harvest/ensemble",
+    response_model=EnsembleHarvestResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Ensemble Hasat Tahmini (XGBoost + LSTM)",
+    description=(
+        "48 timestep LSTM olgunluk trendi + XGBoost ağırlıklı average ve "
+        "isotonic calibration. Mobil detay ekranı için XGB/LSTM kırılımlarını döner."
+    ),
+)
+def create_ensemble_harvest_prediction(
+    request: HarvestPredictionRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    request.use_ensemble = True
+    pred, result = _run_and_persist_harvest(
+        request, current_user, db, force_ensemble=True
+    )
+    details = result.get("details") or {}
+    planting = request.planting_date or date.today()
+    return EnsembleHarvestResponse(
+        prediction_id=pred.id,
+        greenhouse_id=pred.greenhouse_id,
+        planting_date=planting,
+        predicted_harvest_date=pred.predicted_harvest_date,
+        predicted_days_remaining=pred.predicted_days_remaining,
+        predicted_days_xgb=details.get("predicted_days_xgb"),
+        predicted_days_lstm=details.get("predicted_days_lstm"),
+        predicted_days_ensemble_raw=details.get("predicted_days_ensemble_raw"),
+        predicted_yield_kg_m2=pred.predicted_yield_kg_m2,
+        confidence_score=pred.confidence_score,
+        model_version=pred.model_version,
+        created_at=pred.created_at,
+    )
+
+
+@router.get(
+    "/weather",
+    response_model=WeatherResponse,
+    summary="Şehir Hava Durumu (Open-Meteo)",
+    description=(
+        "Geocoding ile şehir koordinata çevrilir, ardından 7 günlük forecast alınır. "
+        "Mobil uygulamalar için JWT korumalıdır."
+    ),
+)
+def get_city_weather(
+    city: str = Query(default="İstanbul", min_length=2, description="Şehir adı"),
+    current_user: User = Depends(get_current_user),
+):
+    _ = current_user
+    try:
+        report = predict_weather(city=city)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Hava durumu servisine ulaşılamadı: {exc}",
+        ) from exc
+
+    return WeatherResponse(
+        sehir=report.get("sehir"),
+        il=report.get("il"),
+        ulke=report.get("ulke"),
+        koordinatlar=report.get("koordinatlar") or {},
+        guncel=report.get("guncel") or {},
+        tahmin=report.get("tahmin") or [],
+        summary=report.get("summary"),
     )
 
 
@@ -173,10 +309,6 @@ def request_disease_risk(
 ):
     """
     Görüntü analizi + çevre koşullarını birleştirerek hastalık riski hesaplar.
-
-    Vision servisi (Esma + Dilan) görüntü analizinden `disease_prob_from_vision`
-    alanını doldurarak bu endpoint'i çağırır.
-
     Hastalık riski yüksekse (>0.70) mobil uygulama FCM bildirimi gönderir.
     """
     _verify_greenhouse_owner(body.greenhouse_id, user, db)
@@ -209,10 +341,7 @@ def get_prediction_history(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Bir seranın geçmiş hasat tahminlerini getirir.
-    Faz 3 model kalibrasyonu için kullanılır.
-    """
+    """Bir seranın geçmiş hasat tahminlerini getirir."""
     _verify_greenhouse_owner(greenhouse_id, user, db)
 
     predictions = (
@@ -229,9 +358,13 @@ def get_prediction_history(
             greenhouse_id=p.greenhouse_id,
             predicted_harvest_date=p.predicted_harvest_date,
             predicted_days_remaining=p.predicted_days_remaining,
+            predicted_yield_kg_m2=p.predicted_yield_kg_m2,
             confidence_score=p.confidence_score,
             model_version=p.model_version,
             created_at=p.created_at,
+            details=(p.raw_features or {}).get("details")
+            if isinstance(p.raw_features, dict)
+            else None,
         )
         for p in predictions
     ]

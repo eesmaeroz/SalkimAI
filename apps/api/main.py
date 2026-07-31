@@ -69,10 +69,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Salkım AI API",
     description=(
-        "Sera domatesi analiz platformu — Görüntü işleme, hastalık tespiti "
-        "ve hasat tahmini API'si. JWT ile korunur."
+        "Sera domatesi analiz platformu — Görüntü işleme, hastalık tespiti, "
+        "hasat tahmini (XGBoost+LSTM ensemble) ve Open-Meteo hava durumu API'si. "
+        "JWT ile korunur."
     ),
-    version="1.0.0",
+    version="1.1.0",
     lifespan=lifespan,
 )
 

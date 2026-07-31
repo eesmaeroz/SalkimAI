@@ -1,0 +1,104 @@
+paths:
+  schema: config/schema.yaml
+  raw_data: data/raw/greenhouse_data.csv
+  processed_data: data/processed/greenhouse_features.csv
+  sequence_data: data/processed/maturity_sequences.npz
+  model_output: models/random_forest_yield_model.joblib
+  harvest_model_output: models/xgboost_harvest_date_model.joblib
+  lstm_model_output: models/lstm_maturity_model.keras
+  lstm_scaler_output: models/lstm_maturity_scaler.joblib
+  ensemble_output: models/maturity_ensemble.joblib
+  metrics_output: reports/metrics.json
+  harvest_metrics_output: reports/harvest_metrics.json
+  lstm_metrics_output: reports/lstm_metrics.json
+  ensemble_metrics_output: reports/ensemble_metrics.json
+  feature_report_output: reports/feature_report.json
+  predictions_output: reports/predictions.csv
+  harvest_predictions_output: reports/harvest_predictions.csv
+  ensemble_predictions_output: reports/ensemble_harvest_predictions.csv
+
+mlflow:
+  tracking_uri: sqlite:///C:/salkim_ai/mlflow.db
+  artifact_location: file:///C:/salkim_ai/mlruns
+  experiment_name: salkim_yield_prediction
+  run_name: random_forest_baseline
+
+feature_engineering:
+  tomato_base_temperature_C: 10
+  planned_cycle_days: 90
+  weather_provider: mock
+  use_mock_weather_when_missing: true
+
+maturity_split:
+  test_size: 0.2
+  random_state: 42
+  calibration_size: 0.5
+
+weather:
+  api_url: https://api.open-meteo.com/v1/forecast
+  geocoding_url: https://geocoding-api.open-meteo.com/v1/search
+  geocoding_language: tr
+  city: İstanbul
+  latitude: 41.0082
+  longitude: 28.9784
+  timezone: Europe/Istanbul
+  forecast_days: 7
+  include_hourly: true
+  cache_expire_seconds: 3600
+  retries: 5
+  backoff_factor: 0.2
+
+openweathermap:
+  api_url: https://api.openweathermap.org/data/2.5/forecast
+  api_key_env: OPENWEATHERMAP_API_KEY
+  latitude: 40.8991
+  longitude: 31.1888
+  units: metric
+  cache_expire_seconds: 3600
+  timeout_seconds: 20
+
+training:
+  target_column: yield_kg_per_m2
+  test_size: 0.2
+  random_state: 42
+
+  model:
+    type: RandomForestRegressor
+    n_estimators: 200
+    max_depth: null
+    min_samples_split: 2
+    min_samples_leaf: 1
+
+harvest_training:
+  target_column: days_to_maturity
+  test_size: 0.2
+  random_state: 42
+  model:
+    type: XGBRegressor
+    n_estimators: 300
+    max_depth: 4
+    learning_rate: 0.05
+    subsample: 0.9
+    colsample_bytree: 0.9
+    objective: reg:squarederror
+
+lstm_training:
+  target_column: days_to_maturity
+  lookback: 48
+  test_size: 0.2
+  random_state: 42
+  epochs: 40
+  batch_size: 16
+  learning_rate: 0.001
+  dropout: 0.2
+  lstm_units:
+    - 64
+    - 32
+  model:
+    type: LSTM
+
+ensemble:
+  xgb_weight: 0.6
+  lstm_weight: 0.4
+  calibration:
+    method: isotonic
