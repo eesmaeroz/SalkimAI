@@ -35,13 +35,23 @@ python -m ml.prediction.features.openweathermap_client
 
 ## 3.1 Open-Meteo gerçek API testi
 
-Open-Meteo API key istemez ve JSON endpoint üzerinden çalışır.
+Open-Meteo API key istemez. Şehir adı geocoding ile koordinata çevrilir,
+ardından 7 günlük forecast alınır.
 
 ```powershell
 python -m ml.prediction.features.weather_provider
 ```
 
-Feature engineering içinde Open-Meteo kullanmak için `config/params.yaml` içinde:
+Şehir değiştirmek için `config/params.yaml`:
+
+```yaml
+weather:
+  city: Konya
+  timezone: Europe/Istanbul
+  forecast_days: 7
+```
+
+Feature engineering içinde Open-Meteo kullanmak için:
 
 ```yaml
 feature_engineering:

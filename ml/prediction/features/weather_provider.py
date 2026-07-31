@@ -1,8 +1,8 @@
-"""Weather providers: Open-Meteo JSON client and deterministic offline mock.
+"""Weather providers: Open-Meteo geocoding + forecast, and offline mock.
 
-The mock functions keep feature engineering repeatable in tests. The live
-Open-Meteo client uses the public JSON forecast endpoint, matching the curl
-format shown in the project notes.
+Live flow mirrors the project JS helper:
+1) resolve city -> lat/lon via Open-Meteo geocoding
+2) fetch current + 7-day daily forecast from the forecast API
 """
 
 from __future__ import annotations
@@ -19,8 +19,85 @@ import yaml
 
 
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
-DEFAULT_LATITUDE = 40.8991
-DEFAULT_LONGITUDE = 31.1888
+OPEN_METEO_GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search"
+DEFAULT_LATITUDE = 41.0082
+DEFAULT_LONGITUDE = 28.9784
+DEFAULT_CITY = "İstanbul"
+DEFAULT_TIMEZONE = "Europe/Istanbul"
+DEFAULT_FORECAST_DAYS = 7
+
+CURRENT_FIELDS = (
+    "temperature_2m",
+    "relative_humidity_2m",
+    "apparent_temperature",
+    "precipitation",
+    "weather_code",
+    "cloud_cover",
+    "wind_speed_10m",
+)
+DAILY_FIELDS = (
+    "weather_code",
+    "temperature_2m_max",
+    "temperature_2m_min",
+    "precipitation_probability_max",
+)
+
+
+def _cached_session(cache_path: str | Path, expire_after: int) -> requests_cache.CachedSession:
+    cache_path = Path(cache_path)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    return requests_cache.CachedSession(str(cache_path), expire_after=expire_after)
+
+
+def resolve_city_location(
+    city: str = DEFAULT_CITY,
+    *,
+    language: str = "tr",
+    count: int = 1,
+    geocoding_url: str = OPEN_METEO_GEOCODING_URL,
+    cache_path: str | Path = ".cache/openmeteo_geocoding",
+    expire_after: int = 3600,
+    retries: int = 5,
+    timeout_seconds: int = 20,
+) -> dict[str, Any]:
+    """Resolve a city name to coordinates via Open-Meteo geocoding."""
+    if not city or not str(city).strip():
+        raise ValueError("city must be a non-empty string.")
+
+    session = _cached_session(cache_path, expire_after)
+    params = {
+        "name": str(city).strip(),
+        "count": int(count),
+        "language": language,
+        "format": "json",
+    }
+
+    last_error: Exception | None = None
+    payload: dict[str, Any] | None = None
+    for _ in range(max(int(retries), 1)):
+        try:
+            response = session.get(geocoding_url, params=params, timeout=timeout_seconds)
+            response.raise_for_status()
+            payload = response.json()
+            break
+        except Exception as error:  # pragma: no cover - network fallback path
+            last_error = error
+    else:
+        raise RuntimeError("Open-Meteo geocoding request failed.") from last_error
+
+    results = (payload or {}).get("results") or []
+    if not results:
+        raise ValueError(f"City not found: {city}")
+
+    location = results[0]
+    return {
+        "name": location.get("name"),
+        "admin1": location.get("admin1"),
+        "country": location.get("country"),
+        "latitude": float(location["latitude"]),
+        "longitude": float(location["longitude"]),
+        "timezone": location.get("timezone"),
+    }
 
 
 def fetch_open_meteo_forecast(
@@ -31,21 +108,33 @@ def fetch_open_meteo_forecast(
     retries: int = 5,
     backoff_factor: float = 0.2,
     api_url: str = OPEN_METEO_URL,
+    timezone: str = DEFAULT_TIMEZONE,
+    forecast_days: int = DEFAULT_FORECAST_DAYS,
+    include_hourly: bool = True,
 ) -> dict[str, Any]:
-    """Fetch current, hourly and daily weather from Open-Meteo JSON API."""
-    cache_path = Path(cache_path)
-    cache_path.parent.mkdir(parents=True, exist_ok=True)
-    session = requests_cache.CachedSession(str(cache_path), expire_after=expire_after)
+    """Fetch current and daily weather from Open-Meteo forecast API.
+
+    Default fields match:
+    current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,
+            weather_code,cloud_cover,wind_speed_10m
+    daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max
+    """
+    _ = backoff_factor  # kept for config compatibility
+    session = _cached_session(cache_path, expire_after)
 
     params: dict[str, Any] = {
         "latitude": latitude,
         "longitude": longitude,
-        "current": "temperature_2m,relative_humidity_2m,wind_speed_10m",
-        "hourly": "temperature_2m,relative_humidity_2m,wind_speed_10m",
-        "daily": "temperature_2m_max,temperature_2m_min,weather_code",
-        "timezone": "auto",
+        "current": ",".join(CURRENT_FIELDS),
+        "daily": ",".join(DAILY_FIELDS),
+        "timezone": timezone,
+        "forecast_days": int(forecast_days),
     }
+    if include_hourly:
+        params["hourly"] = "temperature_2m,relative_humidity_2m,wind_speed_10m"
+
     last_error: Exception | None = None
+    payload: dict[str, Any] | None = None
     for _ in range(max(int(retries), 1)):
         try:
             response = session.get(api_url, params=params, timeout=20)
@@ -57,11 +146,16 @@ def fetch_open_meteo_forecast(
     else:
         raise RuntimeError("Open-Meteo request failed.") from last_error
 
+    assert payload is not None
     current_payload = payload.get("current", {})
     current_data = {
         "time": pd.to_datetime(current_payload.get("time")),
         "temperature_2m": current_payload.get("temperature_2m"),
         "relative_humidity_2m": current_payload.get("relative_humidity_2m"),
+        "apparent_temperature": current_payload.get("apparent_temperature"),
+        "precipitation": current_payload.get("precipitation"),
+        "weather_code": current_payload.get("weather_code"),
+        "cloud_cover": current_payload.get("cloud_cover"),
         "wind_speed_10m": current_payload.get("wind_speed_10m"),
     }
 
@@ -82,6 +176,9 @@ def fetch_open_meteo_forecast(
             "temperature_2m_max": daily_payload.get("temperature_2m_max", []),
             "temperature_2m_min": daily_payload.get("temperature_2m_min", []),
             "weather_code": daily_payload.get("weather_code", []),
+            "precipitation_probability_max": daily_payload.get(
+                "precipitation_probability_max", []
+            ),
         }
     )
 
@@ -99,30 +196,142 @@ def fetch_open_meteo_forecast(
 
 
 def summarize_open_meteo_forecast(forecast: dict[str, Any]) -> dict[str, Any]:
-    """Convert Open-Meteo JSON forecast output into project weather fields."""
+    """Convert Open-Meteo forecast output into project weather fields."""
     daily = forecast["daily"]
     hourly = forecast["hourly"]
-    if daily.empty and hourly.empty:
+    current = forecast.get("current", {})
+
+    if daily.empty and hourly.empty and current.get("temperature_2m") is None:
         raise ValueError("Open-Meteo forecast response is empty.")
 
+    if not hourly.empty:
+        avg_temperature = float(hourly["temperature_2m"].mean())
+        humidity = float(hourly["relative_humidity_2m"].mean())
+    else:
+        avg_temperature = float(current["temperature_2m"])
+        humidity = float(current.get("relative_humidity_2m") or 0.0)
+
+    if not daily.empty:
+        min_temperature = float(daily["temperature_2m_min"].min())
+        max_temperature = float(daily["temperature_2m_max"].max())
+    else:
+        min_temperature = avg_temperature
+        max_temperature = avg_temperature
+
     return {
-        "avg_temperature_C": float(hourly["temperature_2m"].mean()),
-        "min_temperature_C": float(daily["temperature_2m_min"].min()),
-        "max_temperature_C": float(daily["temperature_2m_max"].max()),
-        "humidity_percent": float(hourly["relative_humidity_2m"].mean()),
+        "avg_temperature_C": avg_temperature,
+        "min_temperature_C": min_temperature,
+        "max_temperature_C": max_temperature,
+        "humidity_percent": humidity,
     }
 
 
-def get_open_meteo_weather_data(config: dict[str, Any]) -> dict[str, Any]:
-    """Fetch and summarize Open-Meteo data using project config."""
+def format_weather_report(
+    location: dict[str, Any],
+    forecast: dict[str, Any],
+) -> dict[str, Any]:
+    """Shape location + forecast into the JS-style weather report."""
+    current = forecast["current"]
+    daily = forecast["daily"]
+
+    tahmin: list[dict[str, Any]] = []
+    if not daily.empty:
+        for index, row in daily.iterrows():
+            tarih = row["date"]
+            tahmin.append(
+                {
+                    "tarih": str(pd.Timestamp(tarih).date()),
+                    "enYuksek": row.get("temperature_2m_max"),
+                    "enDusuk": row.get("temperature_2m_min"),
+                    "yagisIhtimali": row.get("precipitation_probability_max"),
+                    "durumKodu": row.get("weather_code"),
+                }
+            )
+
+    return {
+        "sehir": location.get("name"),
+        "il": location.get("admin1"),
+        "ulke": location.get("country"),
+        "koordinatlar": {
+            "enlem": location.get("latitude"),
+            "boylam": location.get("longitude"),
+        },
+        "guncel": {
+            "sicaklik": current.get("temperature_2m"),
+            "hissedilen": current.get("apparent_temperature"),
+            "nem": current.get("relative_humidity_2m"),
+            "ruzgar": current.get("wind_speed_10m"),
+            "yagis": current.get("precipitation"),
+            "bulutluluk": current.get("cloud_cover"),
+            "durumKodu": current.get("weather_code"),
+        },
+        "tahmin": tahmin,
+        "summary": summarize_open_meteo_forecast(forecast),
+    }
+
+
+def get_weather_by_city(
+    city: str = DEFAULT_CITY,
+    config: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """City-based weather: geocode then fetch Open-Meteo forecast."""
+    project_root = Path(__file__).resolve().parents[3]
+    config = config or {}
+
+    location = resolve_city_location(
+        city=city,
+        language=config.get("geocoding_language", "tr"),
+        geocoding_url=config.get("geocoding_url", OPEN_METEO_GEOCODING_URL),
+        cache_path=project_root / ".cache" / "openmeteo_geocoding",
+        expire_after=int(config.get("cache_expire_seconds", 3600)),
+        retries=int(config.get("retries", 5)),
+    )
+
     forecast = fetch_open_meteo_forecast(
-        latitude=config["latitude"],
-        longitude=config["longitude"],
-        cache_path=Path(__file__).resolve().parents[3] / ".cache" / "openmeteo_json",
-        expire_after=config["cache_expire_seconds"],
-        retries=config["retries"],
-        backoff_factor=config["backoff_factor"],
-        api_url=config["api_url"],
+        latitude=location["latitude"],
+        longitude=location["longitude"],
+        cache_path=project_root / ".cache" / "openmeteo_json",
+        expire_after=int(config.get("cache_expire_seconds", 3600)),
+        retries=int(config.get("retries", 5)),
+        backoff_factor=float(config.get("backoff_factor", 0.2)),
+        api_url=config.get("api_url", OPEN_METEO_URL),
+        timezone=config.get("timezone") or location.get("timezone") or DEFAULT_TIMEZONE,
+        forecast_days=int(config.get("forecast_days", DEFAULT_FORECAST_DAYS)),
+        include_hourly=bool(config.get("include_hourly", True)),
+    )
+    return format_weather_report(location, forecast)
+
+
+def hava_durumu_getir(
+    sehir: str = DEFAULT_CITY,
+    config: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Turkish alias for ``get_weather_by_city``."""
+    return get_weather_by_city(city=sehir, config=config)
+
+
+def get_open_meteo_weather_data(config: dict[str, Any]) -> dict[str, Any]:
+    """Fetch and summarize Open-Meteo data using project config.
+
+    Prefer ``city`` (geocoding). Fall back to configured lat/lon.
+    """
+    project_root = Path(__file__).resolve().parents[3]
+    city = config.get("city")
+    if city:
+        report = get_weather_by_city(city=str(city), config=config)
+        return report["summary"]
+
+    forecast = fetch_open_meteo_forecast(
+        latitude=float(config.get("latitude", DEFAULT_LATITUDE)),
+        longitude=float(config.get("longitude", DEFAULT_LONGITUDE)),
+        cache_path=project_root / ".cache" / "openmeteo_json",
+        expire_after=int(config.get("cache_expire_seconds", 3600)),
+        retries=int(config.get("retries", 5)),
+        backoff_factor=float(config.get("backoff_factor", 0.2)),
+        api_url=config.get("api_url", OPEN_METEO_URL),
+        timezone=config.get("timezone", DEFAULT_TIMEZONE),
+        forecast_days=int(config.get("forecast_days", DEFAULT_FORECAST_DAYS)),
+        include_hourly=bool(config.get("include_hourly", True)),
     )
     return summarize_open_meteo_forecast(forecast)
 
@@ -189,19 +398,15 @@ def main() -> None:
     with (project_root / "config" / "params.yaml").open(encoding="utf-8") as stream:
         weather = yaml.safe_load(stream)["weather"]
 
-    forecast = fetch_open_meteo_forecast(
-        latitude=weather["latitude"],
-        longitude=weather["longitude"],
-        cache_path=project_root / ".cache" / "openmeteo",
-        expire_after=weather["cache_expire_seconds"],
-        retries=weather["retries"],
-        backoff_factor=weather["backoff_factor"],
-        api_url=weather["api_url"],
-    )
-    print("Metadata:", forecast["metadata"])
-    print("Current:", forecast["current"])
-    print("\nHourly weather\n", forecast["hourly"])
-    print("\nDaily weather\n", forecast["daily"])
+    city = weather.get("city", DEFAULT_CITY)
+    report = get_weather_by_city(city=city, config=weather)
+    print("Şehir:", report["sehir"], report["il"], report["ulke"])
+    print("Koordinatlar:", report["koordinatlar"])
+    print("Güncel:", report["guncel"])
+    print("\n7 günlük tahmin:")
+    for day in report["tahmin"]:
+        print(day)
+    print("\nFeature summary:", report["summary"])
 
 
 if __name__ == "__main__":
