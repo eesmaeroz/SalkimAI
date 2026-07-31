@@ -1,0 +1,34 @@
+[
+  {
+    "name": "feat/backend-altyapi",
+    "commit": {
+      "sha": "fc72141f73e7f2c41cf24fbedb46ddb8dc28ac07",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/commits/fc72141f73e7f2c41cf24fbedb46ddb8dc28ac07"
+    },
+    "protected": false
+  },
+  {
+    "name": "feat/mobile-app",
+    "commit": {
+      "sha": "866216984bc331548ad5affd8844f25638113503",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/commits/866216984bc331548ad5affd8844f25638113503"
+    },
+    "protected": false
+  },
+  {
+    "name": "main",
+    "commit": {
+      "sha": "f1af3748f1722a2248c8aca8ef8b63577a40ef03",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/commits/f1af3748f1722a2248c8aca8ef8b63577a40ef03"
+    },
+    "protected": false
+  },
+  {
+    "name": "ml",
+    "commit": {
+      "sha": "6ed0b9bf8517d5de16b186395c368bc94a9171d3",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/commits/6ed0b9bf8517d5de16b186395c368bc94a9171d3"
+    },
+    "protected": false
+  }
+]

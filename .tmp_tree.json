@@ -1,0 +1,386 @@
+{
+  "sha": "6ed0b9bf8517d5de16b186395c368bc94a9171d3",
+  "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/6ed0b9bf8517d5de16b186395c368bc94a9171d3",
+  "tree": [
+    {
+      "path": ".dvc",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b8659caea33002a44ec16ae4154edd3877fdb82d",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/b8659caea33002a44ec16ae4154edd3877fdb82d"
+    },
+    {
+      "path": ".dvc/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "528f30c71c687de473bbb506c071e902beba6cd9",
+      "size": 26,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/528f30c71c687de473bbb506c071e902beba6cd9"
+    },
+    {
+      "path": ".dvc/config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "size": 0,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": ".dvcignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "51973055237895f2d23e65e015793fd302f4b9da",
+      "size": 139,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/51973055237895f2d23e65e015793fd302f4b9da"
+    },
+    {
+      "path": ".gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fa41a10f8b4f6497b73117b435c3867c52c01b03",
+      "size": 328,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/fa41a10f8b4f6497b73117b435c3867c52c01b03"
+    },
+    {
+      "path": "PROJECT_DOCUMENTATION.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c7e27081d00d76f6064c84931729586ade6e90f1",
+      "size": 9950,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/c7e27081d00d76f6064c84931729586ade6e90f1"
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "af47ad32e42dcbfac91628916d4196b202726f5c",
+      "size": 1206,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/af47ad32e42dcbfac91628916d4196b202726f5c"
+    },
+    {
+      "path": "RUN_COMMANDS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "28ec4bed901aba95b78d53101403c3c68ece671a",
+      "size": 1934,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/28ec4bed901aba95b78d53101403c3c68ece671a"
+    },
+    {
+      "path": "config",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "05421f0df8cd9f6795225ffc4f26be00e88a77f8",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/05421f0df8cd9f6795225ffc4f26be00e88a77f8"
+    },
+    {
+      "path": "config/params.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e6110bd9b34a24d0598ec1324a7668de364cb58a",
+      "size": 2657,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/e6110bd9b34a24d0598ec1324a7668de364cb58a"
+    },
+    {
+      "path": "config/schema.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a702c8d56bf6455e89eda087bd70346d056f6253",
+      "size": 971,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/a702c8d56bf6455e89eda087bd70346d056f6253"
+    },
+    {
+      "path": "data",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "2c9b7db85dc6376378f0b7946f634d61a63caab9",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/2c9b7db85dc6376378f0b7946f634d61a63caab9"
+    },
+    {
+      "path": "data/processed",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5bfad2b3f8e483b6b173d8aaff19597e84626f15",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/5bfad2b3f8e483b6b173d8aaff19597e84626f15"
+    },
+    {
+      "path": "data/processed/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc"
+    },
+    {
+      "path": "data/raw",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5bfad2b3f8e483b6b173d8aaff19597e84626f15",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/5bfad2b3f8e483b6b173d8aaff19597e84626f15"
+    },
+    {
+      "path": "data/raw/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b137891791fe96927ad78e64b0aad7bded08bdc",
+      "size": 1,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/8b137891791fe96927ad78e64b0aad7bded08bdc"
+    },
+    {
+      "path": "dvc.lock",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bcbdb1bceb5421a5b9f04a149f7510a67e4bfd0c",
+      "size": 5293,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/bcbdb1bceb5421a5b9f04a149f7510a67e4bfd0c"
+    },
+    {
+      "path": "dvc.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fb4bf7a0ebeb8c15738fb08a1325d1bd548c52df",
+      "size": 5304,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/fb4bf7a0ebeb8c15738fb08a1325d1bd548c52df"
+    },
+    {
+      "path": "ml",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "19167f87f5381fef6326b0ea771ae59461711d63",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/19167f87f5381fef6326b0ea771ae59461711d63"
+    },
+    {
+      "path": "ml/prediction",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "69cd11619289dde9c2162626a13ac0189b16900f",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/69cd11619289dde9c2162626a13ac0189b16900f"
+    },
+    {
+      "path": "ml/prediction/calibration",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5f69cf84c24c9bb8acc1bc3c8cd487081ddfaf71",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/5f69cf84c24c9bb8acc1bc3c8cd487081ddfaf71"
+    },
+    {
+      "path": "ml/prediction/calibration/__init__.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "size": 0,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "ml/prediction/calibration/calibrate_maturity.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bddb41de5fd84e4f2711e2960afccfb08af81760",
+      "size": 1671,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/bddb41de5fd84e4f2711e2960afccfb08af81760"
+    },
+    {
+      "path": "ml/prediction/features",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1dfc0338cb00184c03b5a1dd4b1167dcc2dd6f21",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/1dfc0338cb00184c03b5a1dd4b1167dcc2dd6f21"
+    },
+    {
+      "path": "ml/prediction/features/feature_engineering.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "10a65fea35de3e066cd5e08c6aff679a33336d8a",
+      "size": 12201,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/10a65fea35de3e066cd5e08c6aff679a33336d8a"
+    },
+    {
+      "path": "ml/prediction/features/gdd_calculator.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "260db8cd8d161065f834f2d214d6b2e7d5b46e7e",
+      "size": 1419,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/260db8cd8d161065f834f2d214d6b2e7d5b46e7e"
+    },
+    {
+      "path": "ml/prediction/features/openweathermap_client.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a1dc22db6bd243fe23d349a725d96fe38964bfac",
+      "size": 4047,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/a1dc22db6bd243fe23d349a725d96fe38964bfac"
+    },
+    {
+      "path": "ml/prediction/features/timeseries_builder.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "646b97cd0b7e94355bf6f3443c1e521934fe9c23",
+      "size": 5350,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/646b97cd0b7e94355bf6f3443c1e521934fe9c23"
+    },
+    {
+      "path": "ml/prediction/features/weather_provider.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "da66d52d16d8911aac4fd037e484d127d29c7422",
+      "size": 14802,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/da66d52d16d8911aac4fd037e484d127d29c7422"
+    },
+    {
+      "path": "ml/prediction/inference",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "226c7f41c3548e3028d425dca798568382bc83b1",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/226c7f41c3548e3028d425dca798568382bc83b1"
+    },
+    {
+      "path": "ml/prediction/inference/predict.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ee3b293c5555a62032f9a9af3d0a87286a872baa",
+      "size": 1930,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/ee3b293c5555a62032f9a9af3d0a87286a872baa"
+    },
+    {
+      "path": "ml/prediction/inference/predict_harvest_date.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1d58dce6ac60c28f218b700a51cc8dba357755ab",
+      "size": 2771,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/1d58dce6ac60c28f218b700a51cc8dba357755ab"
+    },
+    {
+      "path": "ml/prediction/inference/predict_harvest_ensemble.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "18747b5c15ac65c6f3c2516c32bc77273fe51b74",
+      "size": 4985,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/18747b5c15ac65c6f3c2516c32bc77273fe51b74"
+    },
+    {
+      "path": "ml/prediction/training",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4e3433754012a368eb043e14ddd3b30a74cc80bf",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/4e3433754012a368eb043e14ddd3b30a74cc80bf"
+    },
+    {
+      "path": "ml/prediction/training/maturity_common.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "69fa955f6af6d7615dcb8cb5768b644324af8955",
+      "size": 2087,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/69fa955f6af6d7615dcb8cb5768b644324af8955"
+    },
+    {
+      "path": "ml/prediction/training/train_ensemble.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "79105ceeea4f45da3c662c5af9737c830324ead4",
+      "size": 8664,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/79105ceeea4f45da3c662c5af9737c830324ead4"
+    },
+    {
+      "path": "ml/prediction/training/train_harvest_model.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f1fb8361ed2e5b7bd03a61fd7a772c9c58cec921",
+      "size": 6272,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/f1fb8361ed2e5b7bd03a61fd7a772c9c58cec921"
+    },
+    {
+      "path": "ml/prediction/training/train_lstm_maturity.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1ff76d8a398297aa4d0e10f20023e9d2ac7325d5",
+      "size": 8607,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/1ff76d8a398297aa4d0e10f20023e9d2ac7325d5"
+    },
+    {
+      "path": "ml/prediction/training/train_model.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6b480fbf8a46388f5addbb05853d98423389bea7",
+      "size": 7456,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/6b480fbf8a46388f5addbb05853d98423389bea7"
+    },
+    {
+      "path": "requirements.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1850f7fa5908ca6f262c6fc30ec8785ed92b7dcb",
+      "size": 242,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/1850f7fa5908ca6f262c6fc30ec8785ed92b7dcb"
+    },
+    {
+      "path": "scripts",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "828c5dcabc5a21db817fb58d43304e0a934e8d0a",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/828c5dcabc5a21db817fb58d43304e0a934e8d0a"
+    },
+    {
+      "path": "scripts/create_sample_data.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c26026229a8b5346e96a45c9ddad1096bddf83f6",
+      "size": 3711,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/c26026229a8b5346e96a45c9ddad1096bddf83f6"
+    },
+    {
+      "path": "tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d64dde1dfd64b2edba7790265e3e8fa0187d15cf",
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/d64dde1dfd64b2edba7790265e3e8fa0187d15cf"
+    },
+    {
+      "path": "tests/test_feature_engineering.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0d4dd75e4b50b799bab534fbaf8d3f3409c8ed22",
+      "size": 3734,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/0d4dd75e4b50b799bab534fbaf8d3f3409c8ed22"
+    },
+    {
+      "path": "tests/test_gdd_calculator.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "51c3783c78b6143b09d208a6361d3f9de5957a50",
+      "size": 1177,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/51c3783c78b6143b09d208a6361d3f9de5957a50"
+    },
+    {
+      "path": "tests/test_lstm_ensemble.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eacebd22f1dea95cfc5b137812e3b09b75bbadc3",
+      "size": 4105,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/eacebd22f1dea95cfc5b137812e3b09b75bbadc3"
+    },
+    {
+      "path": "tests/test_openmeteo_json_client.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5f6440b80e835f70b6bf133f63b3e7d322ef1393",
+      "size": 3732,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/5f6440b80e835f70b6bf133f63b3e7d322ef1393"
+    },
+    {
+      "path": "tests/test_openweathermap_client.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1a24c8ab54b4b731124b6868e83bb94a93c32bee",
+      "size": 427,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/1a24c8ab54b4b731124b6868e83bb94a93c32bee"
+    },
+    {
+      "path": "tests/test_predict_harvest_date.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc5cdd1f1fe52ca1acc3f80e61a11f32be9879e9",
+      "size": 727,
+      "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/bc5cdd1f1fe52ca1acc3f80e61a11f32be9879e9"
+    }
+  ],
+  "truncated": false
+}

@@ -1,0 +1,594 @@
+[
+  {
+    "name": ".dockerignore",
+    "path": ".dockerignore",
+    "sha": "01081287441ee5a29cad2c16adeb16a27fcff478",
+    "size": 84,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/.dockerignore?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/.dockerignore",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/01081287441ee5a29cad2c16adeb16a27fcff478",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/.dockerignore",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/.dockerignore?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/01081287441ee5a29cad2c16adeb16a27fcff478",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/.dockerignore"
+    }
+  },
+  {
+    "name": ".dvc",
+    "path": ".dvc",
+    "sha": "b8659caea33002a44ec16ae4154edd3877fdb82d",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/.dvc?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/.dvc",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/b8659caea33002a44ec16ae4154edd3877fdb82d",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/.dvc?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/b8659caea33002a44ec16ae4154edd3877fdb82d",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/.dvc"
+    }
+  },
+  {
+    "name": ".dvcignore",
+    "path": ".dvcignore",
+    "sha": "51973055237895f2d23e65e015793fd302f4b9da",
+    "size": 139,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/.dvcignore?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/.dvcignore",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/51973055237895f2d23e65e015793fd302f4b9da",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/.dvcignore",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/.dvcignore?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/51973055237895f2d23e65e015793fd302f4b9da",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/.dvcignore"
+    }
+  },
+  {
+    "name": ".gitignore",
+    "path": ".gitignore",
+    "sha": "ebb8cbf0301d24001a4d080d9eb1f3c0f293a7e6",
+    "size": 1011,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/.gitignore?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/.gitignore",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/ebb8cbf0301d24001a4d080d9eb1f3c0f293a7e6",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/.gitignore",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/.gitignore?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/ebb8cbf0301d24001a4d080d9eb1f3c0f293a7e6",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/.gitignore"
+    }
+  },
+  {
+    "name": ".metadata",
+    "path": ".metadata",
+    "sha": "51c0bb529c93ae26b5aecae4f273d905a92ad50f",
+    "size": 1706,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/.metadata?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/.metadata",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/51c0bb529c93ae26b5aecae4f273d905a92ad50f",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/.metadata",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/.metadata?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/51c0bb529c93ae26b5aecae4f273d905a92ad50f",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/.metadata"
+    }
+  },
+  {
+    "name": "Dockerfile",
+    "path": "Dockerfile",
+    "sha": "eae809aa331e851f0ce3d821d28d5bb9e3516c14",
+    "size": 391,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/Dockerfile?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/Dockerfile",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/eae809aa331e851f0ce3d821d28d5bb9e3516c14",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/Dockerfile",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/Dockerfile?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/eae809aa331e851f0ce3d821d28d5bb9e3516c14",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/Dockerfile"
+    }
+  },
+  {
+    "name": "README.md",
+    "path": "README.md",
+    "sha": "97abc9de34c7a1c7728ff29adc0568e095f0e2c1",
+    "size": 2744,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/README.md?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/README.md",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/97abc9de34c7a1c7728ff29adc0568e095f0e2c1",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/README.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/README.md?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/97abc9de34c7a1c7728ff29adc0568e095f0e2c1",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/README.md"
+    }
+  },
+  {
+    "name": "RUN_COMMANDS.md",
+    "path": "RUN_COMMANDS.md",
+    "sha": "9e8776af0dfdfe9602d36d24ac521406de9cedaf",
+    "size": 522,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/RUN_COMMANDS.md?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/RUN_COMMANDS.md",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/9e8776af0dfdfe9602d36d24ac521406de9cedaf",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/RUN_COMMANDS.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/RUN_COMMANDS.md?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/9e8776af0dfdfe9602d36d24ac521406de9cedaf",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/RUN_COMMANDS.md"
+    }
+  },
+  {
+    "name": "Salkım_Yazılım_ve_Tamamlama_Planı.txt",
+    "path": "Salkım_Yazılım_ve_Tamamlama_Planı.txt",
+    "sha": "1d798e24bd2a8d948f204e8e8fbae0036462d882",
+    "size": 16384,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/Salk%C4%B1m_Yaz%C4%B1l%C4%B1m_ve_Tamamlama_Plan%C4%B1.txt?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/Salk%C4%B1m_Yaz%C4%B1l%C4%B1m_ve_Tamamlama_Plan%C4%B1.txt",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/1d798e24bd2a8d948f204e8e8fbae0036462d882",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/Salkım_Yazılım_ve_Tamamlama_Planı.txt",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/Salk%C4%B1m_Yaz%C4%B1l%C4%B1m_ve_Tamamlama_Plan%C4%B1.txt?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/1d798e24bd2a8d948f204e8e8fbae0036462d882",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/Salk%C4%B1m_Yaz%C4%B1l%C4%B1m_ve_Tamamlama_Plan%C4%B1.txt"
+    }
+  },
+  {
+    "name": "Sprint1",
+    "path": "Sprint1",
+    "sha": "55d06590a7d6a8748578f3329bc1ee3703d8682b",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/Sprint1?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/Sprint1",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/55d06590a7d6a8748578f3329bc1ee3703d8682b",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/Sprint1?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/55d06590a7d6a8748578f3329bc1ee3703d8682b",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/Sprint1"
+    }
+  },
+  {
+    "name": "Sprint2",
+    "path": "Sprint2",
+    "sha": "b7e7877cbef2ac81dabbd14e6b1c31a08c142732",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/Sprint2?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/Sprint2",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/b7e7877cbef2ac81dabbd14e6b1c31a08c142732",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/Sprint2?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/b7e7877cbef2ac81dabbd14e6b1c31a08c142732",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/Sprint2"
+    }
+  },
+  {
+    "name": "alembic.ini",
+    "path": "alembic.ini",
+    "sha": "c782d975e01f6a4c10f31ab25b0f22f3033951a9",
+    "size": 658,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/alembic.ini?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/alembic.ini",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/c782d975e01f6a4c10f31ab25b0f22f3033951a9",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/alembic.ini",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/alembic.ini?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/c782d975e01f6a4c10f31ab25b0f22f3033951a9",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/alembic.ini"
+    }
+  },
+  {
+    "name": "analysis_options.yaml",
+    "path": "analysis_options.yaml",
+    "sha": "0d2902135caece481a035652d88970c80e29cc7e",
+    "size": 1420,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/analysis_options.yaml?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/analysis_options.yaml",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/0d2902135caece481a035652d88970c80e29cc7e",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/analysis_options.yaml",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/analysis_options.yaml?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/0d2902135caece481a035652d88970c80e29cc7e",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/analysis_options.yaml"
+    }
+  },
+  {
+    "name": "android",
+    "path": "android",
+    "sha": "a0120f71bab49fbdb5c058722b52445ece616f86",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/android?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/android",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/a0120f71bab49fbdb5c058722b52445ece616f86",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/android?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/a0120f71bab49fbdb5c058722b52445ece616f86",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/android"
+    }
+  },
+  {
+    "name": "apps",
+    "path": "apps",
+    "sha": "b2b346f776c1ea028c252a2de2bd1faf7acf0b97",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/apps?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/apps",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/b2b346f776c1ea028c252a2de2bd1faf7acf0b97",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/apps?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/b2b346f776c1ea028c252a2de2bd1faf7acf0b97",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/apps"
+    }
+  },
+  {
+    "name": "config",
+    "path": "config",
+    "sha": "02ae3016ea0b1f815edd3da3e7f1e7e4f80ba873",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/config?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/config",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/02ae3016ea0b1f815edd3da3e7f1e7e4f80ba873",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/config?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/02ae3016ea0b1f815edd3da3e7f1e7e4f80ba873",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/config"
+    }
+  },
+  {
+    "name": "data",
+    "path": "data",
+    "sha": "318659f8aca69641c167e3e8976ee0dae683cf94",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/data?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/data",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/318659f8aca69641c167e3e8976ee0dae683cf94",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/data?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/318659f8aca69641c167e3e8976ee0dae683cf94",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/data"
+    }
+  },
+  {
+    "name": "docker-compose.yml",
+    "path": "docker-compose.yml",
+    "sha": "523df8adfac56eb0d81af5566f5058a409694aa2",
+    "size": 4236,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/docker-compose.yml?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/docker-compose.yml",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/523df8adfac56eb0d81af5566f5058a409694aa2",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/docker-compose.yml",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/docker-compose.yml?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/523df8adfac56eb0d81af5566f5058a409694aa2",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/docker-compose.yml"
+    }
+  },
+  {
+    "name": "dvc.lock",
+    "path": "dvc.lock",
+    "sha": "9032434d846fb256f3b25e282c17738c38b1f7e3",
+    "size": 2589,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/dvc.lock?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/dvc.lock",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/9032434d846fb256f3b25e282c17738c38b1f7e3",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/dvc.lock",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/dvc.lock?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/9032434d846fb256f3b25e282c17738c38b1f7e3",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/dvc.lock"
+    }
+  },
+  {
+    "name": "dvc.yaml",
+    "path": "dvc.yaml",
+    "sha": "48518e1aa9501f736dc6eccd01cea9785572afce",
+    "size": 1211,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/dvc.yaml?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/dvc.yaml",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/48518e1aa9501f736dc6eccd01cea9785572afce",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/dvc.yaml",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/dvc.yaml?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/48518e1aa9501f736dc6eccd01cea9785572afce",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/dvc.yaml"
+    }
+  },
+  {
+    "name": "infra",
+    "path": "infra",
+    "sha": "6e0863e12382ee185c9e4dd8f4c8e1a2c374ca1c",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/infra?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/infra",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/6e0863e12382ee185c9e4dd8f4c8e1a2c374ca1c",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/infra?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/6e0863e12382ee185c9e4dd8f4c8e1a2c374ca1c",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/infra"
+    }
+  },
+  {
+    "name": "ios",
+    "path": "ios",
+    "sha": "572ef6a2561531f0e3fd7c7cdc2bcafd0249849d",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/ios?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/ios",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/572ef6a2561531f0e3fd7c7cdc2bcafd0249849d",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/ios?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/572ef6a2561531f0e3fd7c7cdc2bcafd0249849d",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/ios"
+    }
+  },
+  {
+    "name": "lib",
+    "path": "lib",
+    "sha": "d7e67fb6165119546cdcf20a16369f12ff534da1",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/lib?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/lib",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/d7e67fb6165119546cdcf20a16369f12ff534da1",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/lib?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/d7e67fb6165119546cdcf20a16369f12ff534da1",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/lib"
+    }
+  },
+  {
+    "name": "linux",
+    "path": "linux",
+    "sha": "74d74972637a9a0713dee59550d5e7f7f942e1e5",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/linux?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/linux",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/74d74972637a9a0713dee59550d5e7f7f942e1e5",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/linux?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/74d74972637a9a0713dee59550d5e7f7f942e1e5",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/linux"
+    }
+  },
+  {
+    "name": "macos",
+    "path": "macos",
+    "sha": "cc3f2e1ee85f6abf9fa17ad4d3802f94e98cc375",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/macos?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/macos",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/cc3f2e1ee85f6abf9fa17ad4d3802f94e98cc375",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/macos?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/cc3f2e1ee85f6abf9fa17ad4d3802f94e98cc375",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/macos"
+    }
+  },
+  {
+    "name": "ml",
+    "path": "ml",
+    "sha": "4b02d3828dbc984408f48fe0925a2586ff6fd3a0",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/ml?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/ml",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/4b02d3828dbc984408f48fe0925a2586ff6fd3a0",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/ml?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/4b02d3828dbc984408f48fe0925a2586ff6fd3a0",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/ml"
+    }
+  },
+  {
+    "name": "models",
+    "path": "models",
+    "sha": "cc091b70f1d63cc5aeadca3715a8e395c1f64d47",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/models?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/models",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/cc091b70f1d63cc5aeadca3715a8e395c1f64d47",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/models?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/cc091b70f1d63cc5aeadca3715a8e395c1f64d47",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/models"
+    }
+  },
+  {
+    "name": "nixpacks.toml",
+    "path": "nixpacks.toml",
+    "sha": "8742c8de4e9e728ea56a3d1724a8331ea5e2e38c",
+    "size": 86,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/nixpacks.toml?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/nixpacks.toml",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/8742c8de4e9e728ea56a3d1724a8331ea5e2e38c",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/nixpacks.toml",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/nixpacks.toml?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/8742c8de4e9e728ea56a3d1724a8331ea5e2e38c",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/nixpacks.toml"
+    }
+  },
+  {
+    "name": "pubspec.lock",
+    "path": "pubspec.lock",
+    "sha": "a37029f0ad32c8a3f46afb22417fc6037755df2d",
+    "size": 11105,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/pubspec.lock?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/pubspec.lock",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/a37029f0ad32c8a3f46afb22417fc6037755df2d",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/pubspec.lock",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/pubspec.lock?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/a37029f0ad32c8a3f46afb22417fc6037755df2d",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/pubspec.lock"
+    }
+  },
+  {
+    "name": "pubspec.yaml",
+    "path": "pubspec.yaml",
+    "sha": "fdb5613e56132cafb2c128e02753e4e34d519271",
+    "size": 358,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/pubspec.yaml?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/pubspec.yaml",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/fdb5613e56132cafb2c128e02753e4e34d519271",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/pubspec.yaml",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/pubspec.yaml?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/fdb5613e56132cafb2c128e02753e4e34d519271",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/pubspec.yaml"
+    }
+  },
+  {
+    "name": "requirements.txt",
+    "path": "requirements.txt",
+    "sha": "374c16e91d8407d757c4dfcc584977e0e7732231",
+    "size": 664,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/requirements.txt?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/requirements.txt",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/374c16e91d8407d757c4dfcc584977e0e7732231",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/requirements.txt",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/requirements.txt?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/374c16e91d8407d757c4dfcc584977e0e7732231",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/requirements.txt"
+    }
+  },
+  {
+    "name": "scripts",
+    "path": "scripts",
+    "sha": "ed28e36579507feb3c56d4a22f155ecdf8f87b00",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/scripts?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/scripts",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/ed28e36579507feb3c56d4a22f155ecdf8f87b00",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/scripts?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/ed28e36579507feb3c56d4a22f155ecdf8f87b00",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/scripts"
+    }
+  },
+  {
+    "name": "sprint_board.png",
+    "path": "sprint_board.png",
+    "sha": "9b7fb689539178216cc5a8998cac552ffc046c9d",
+    "size": 38378,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/sprint_board.png?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/blob/main/sprint_board.png",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/9b7fb689539178216cc5a8998cac552ffc046c9d",
+    "download_url": "https://raw.githubusercontent.com/eesmaeroz/SalkimAI/main/sprint_board.png",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/sprint_board.png?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/blobs/9b7fb689539178216cc5a8998cac552ffc046c9d",
+      "html": "https://github.com/eesmaeroz/SalkimAI/blob/main/sprint_board.png"
+    }
+  },
+  {
+    "name": "test",
+    "path": "test",
+    "sha": "e9930cdb66c801aedbe07ce0bbd941a28b0706be",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/test?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/test",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/e9930cdb66c801aedbe07ce0bbd941a28b0706be",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/test?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/e9930cdb66c801aedbe07ce0bbd941a28b0706be",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/test"
+    }
+  },
+  {
+    "name": "tests",
+    "path": "tests",
+    "sha": "6490892286bc6c03c23a5d9e1fd867365dc7d874",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/tests?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/tests",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/6490892286bc6c03c23a5d9e1fd867365dc7d874",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/tests?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/6490892286bc6c03c23a5d9e1fd867365dc7d874",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/tests"
+    }
+  },
+  {
+    "name": "web",
+    "path": "web",
+    "sha": "b4c8ec65a5785d2661659c1f010c1a950cb09d3c",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/web?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/web",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/b4c8ec65a5785d2661659c1f010c1a950cb09d3c",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/web?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/b4c8ec65a5785d2661659c1f010c1a950cb09d3c",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/web"
+    }
+  },
+  {
+    "name": "windows",
+    "path": "windows",
+    "sha": "5b979c12c96d4200f3bcc01462da595cfb65032b",
+    "size": 0,
+    "url": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/windows?ref=main",
+    "html_url": "https://github.com/eesmaeroz/SalkimAI/tree/main/windows",
+    "git_url": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/5b979c12c96d4200f3bcc01462da595cfb65032b",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/eesmaeroz/SalkimAI/contents/windows?ref=main",
+      "git": "https://api.github.com/repos/eesmaeroz/SalkimAI/git/trees/5b979c12c96d4200f3bcc01462da595cfb65032b",
+      "html": "https://github.com/eesmaeroz/SalkimAI/tree/main/windows"
+    }
+  }
+]

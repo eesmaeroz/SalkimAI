@@ -1,0 +1,114 @@
+[
+  {
+    "name": ".gitignore",
+    "path": ".gitignore",
+    "sha": "9e03a23b056881c24fcf12063a681ddb7bf2cc27",
+    "size": 316,
+    "url": "https://api.github.com/repos/arif-erdogan/prediction-system/contents/.gitignore?ref=main",
+    "html_url": "https://github.com/arif-erdogan/prediction-system/blob/main/.gitignore",
+    "git_url": "https://api.github.com/repos/arif-erdogan/prediction-system/git/blobs/9e03a23b056881c24fcf12063a681ddb7bf2cc27",
+    "download_url": "https://raw.githubusercontent.com/arif-erdogan/prediction-system/main/.gitignore",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/arif-erdogan/prediction-system/contents/.gitignore?ref=main",
+      "git": "https://api.github.com/repos/arif-erdogan/prediction-system/git/blobs/9e03a23b056881c24fcf12063a681ddb7bf2cc27",
+      "html": "https://github.com/arif-erdogan/prediction-system/blob/main/.gitignore"
+    }
+  },
+  {
+    "name": "Dockerfile",
+    "path": "Dockerfile",
+    "sha": "e5e3e1c2dc48ebd23069de6a2e21e670ad4423e4",
+    "size": 727,
+    "url": "https://api.github.com/repos/arif-erdogan/prediction-system/contents/Dockerfile?ref=main",
+    "html_url": "https://github.com/arif-erdogan/prediction-system/blob/main/Dockerfile",
+    "git_url": "https://api.github.com/repos/arif-erdogan/prediction-system/git/blobs/e5e3e1c2dc48ebd23069de6a2e21e670ad4423e4",
+    "download_url": "https://raw.githubusercontent.com/arif-erdogan/prediction-system/main/Dockerfile",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/arif-erdogan/prediction-system/contents/Dockerfile?ref=main",
+      "git": "https://api.github.com/repos/arif-erdogan/prediction-system/git/blobs/e5e3e1c2dc48ebd23069de6a2e21e670ad4423e4",
+      "html": "https://github.com/arif-erdogan/prediction-system/blob/main/Dockerfile"
+    }
+  },
+  {
+    "name": "docker-compose.yml",
+    "path": "docker-compose.yml",
+    "sha": "22ce6b23dab2cb08b0521a1d72cb7ff2b2756c8c",
+    "size": 678,
+    "url": "https://api.github.com/repos/arif-erdogan/prediction-system/contents/docker-compose.yml?ref=main",
+    "html_url": "https://github.com/arif-erdogan/prediction-system/blob/main/docker-compose.yml",
+    "git_url": "https://api.github.com/repos/arif-erdogan/prediction-system/git/blobs/22ce6b23dab2cb08b0521a1d72cb7ff2b2756c8c",
+    "download_url": "https://raw.githubusercontent.com/arif-erdogan/prediction-system/main/docker-compose.yml",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/arif-erdogan/prediction-system/contents/docker-compose.yml?ref=main",
+      "git": "https://api.github.com/repos/arif-erdogan/prediction-system/git/blobs/22ce6b23dab2cb08b0521a1d72cb7ff2b2756c8c",
+      "html": "https://github.com/arif-erdogan/prediction-system/blob/main/docker-compose.yml"
+    }
+  },
+  {
+    "name": "firebase_service.py",
+    "path": "firebase_service.py",
+    "sha": "035b66ad3401617d4dbd388864477da5fe1aad8f",
+    "size": 8725,
+    "url": "https://api.github.com/repos/arif-erdogan/prediction-system/contents/firebase_service.py?ref=main",
+    "html_url": "https://github.com/arif-erdogan/prediction-system/blob/main/firebase_service.py",
+    "git_url": "https://api.github.com/repos/arif-erdogan/prediction-system/git/blobs/035b66ad3401617d4dbd388864477da5fe1aad8f",
+    "download_url": "https://raw.githubusercontent.com/arif-erdogan/prediction-system/main/firebase_service.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/arif-erdogan/prediction-system/contents/firebase_service.py?ref=main",
+      "git": "https://api.github.com/repos/arif-erdogan/prediction-system/git/blobs/035b66ad3401617d4dbd388864477da5fe1aad8f",
+      "html": "https://github.com/arif-erdogan/prediction-system/blob/main/firebase_service.py"
+    }
+  },
+  {
+    "name": "main.py",
+    "path": "main.py",
+    "sha": "9afc591096d240cfe5982fe0f77c6a79fb791586",
+    "size": 24967,
+    "url": "https://api.github.com/repos/arif-erdogan/prediction-system/contents/main.py?ref=main",
+    "html_url": "https://github.com/arif-erdogan/prediction-system/blob/main/main.py",
+    "git_url": "https://api.github.com/repos/arif-erdogan/prediction-system/git/blobs/9afc591096d240cfe5982fe0f77c6a79fb791586",
+    "download_url": "https://raw.githubusercontent.com/arif-erdogan/prediction-system/main/main.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/arif-erdogan/prediction-system/contents/main.py?ref=main",
+      "git": "https://api.github.com/repos/arif-erdogan/prediction-system/git/blobs/9afc591096d240cfe5982fe0f77c6a79fb791586",
+      "html": "https://github.com/arif-erdogan/prediction-system/blob/main/main.py"
+    }
+  },
+  {
+    "name": "prediction_models.py",
+    "path": "prediction_models.py",
+    "sha": "9a9cff87958352f784f69d5d13162e38a95b239a",
+    "size": 18776,
+    "url": "https://api.github.com/repos/arif-erdogan/prediction-system/contents/prediction_models.py?ref=main",
+    "html_url": "https://github.com/arif-erdogan/prediction-system/blob/main/prediction_models.py",
+    "git_url": "https://api.github.com/repos/arif-erdogan/prediction-system/git/blobs/9a9cff87958352f784f69d5d13162e38a95b239a",
+    "download_url": "https://raw.githubusercontent.com/arif-erdogan/prediction-system/main/prediction_models.py",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/arif-erdogan/prediction-system/contents/prediction_models.py?ref=main",
+      "git": "https://api.github.com/repos/arif-erdogan/prediction-system/git/blobs/9a9cff87958352f784f69d5d13162e38a95b239a",
+      "html": "https://github.com/arif-erdogan/prediction-system/blob/main/prediction_models.py"
+    }
+  },
+  {
+    "name": "requirements.txt",
+    "path": "requirements.txt",
+    "sha": "02834040b16e6506f37f3a8d4ead043f60852de8",
+    "size": 609,
+    "url": "https://api.github.com/repos/arif-erdogan/prediction-system/contents/requirements.txt?ref=main",
+    "html_url": "https://github.com/arif-erdogan/prediction-system/blob/main/requirements.txt",
+    "git_url": "https://api.github.com/repos/arif-erdogan/prediction-system/git/blobs/02834040b16e6506f37f3a8d4ead043f60852de8",
+    "download_url": "https://raw.githubusercontent.com/arif-erdogan/prediction-system/main/requirements.txt",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/arif-erdogan/prediction-system/contents/requirements.txt?ref=main",
+      "git": "https://api.github.com/repos/arif-erdogan/prediction-system/git/blobs/02834040b16e6506f37f3a8d4ead043f60852de8",
+      "html": "https://github.com/arif-erdogan/prediction-system/blob/main/requirements.txt"
+    }
+  }
+]
