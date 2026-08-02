@@ -15,7 +15,7 @@ import uuid
 from datetime import datetime
 from typing import Optional, Any
 
-from sqlalchemy import String, Float, Integer, DateTime, ForeignKey, func
+from sqlalchemy import String, Float, Integer, DateTime, ForeignKey, func, JSON
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -24,6 +24,9 @@ from apps.api.models.base import Base, TimestampMixin
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from apps.api.models.image import Image
+
+# SQLite-compatible JSONB variant
+VariantJSON = JSON().with_variant(JSONB, "postgresql")
 
 
 class Analysis(TimestampMixin, Base):
@@ -60,8 +63,8 @@ class Analysis(TimestampMixin, Base):
         Integer, nullable=True,
         comment="YOLO tarafından tespit edilen toplam domates sayısı",
     )
-    raw_results: Mapped[Optional[Any]] = mapped_column(
-        JSONB, nullable=True,
+    raw_results: Mapped[Optional[dict[str, Any]]] = mapped_column(
+        VariantJSON, nullable=True,
         comment="Her domates için detaylı analiz JSON'ı",
     )
     model_version: Mapped[Optional[str]] = mapped_column(

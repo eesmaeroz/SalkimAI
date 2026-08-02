@@ -15,6 +15,13 @@ CELERY_TASK_DURATION = Histogram(
     buckets=[1.0, 2.5, 5.0, 10.0, 30.0, 60.0, 120.0, float("inf")]
 )
 
+MODEL_INFERENCE_TIME = Histogram(
+    "model_inference_duration_seconds",
+    "ML model tahmin süresi (saniye)",
+    ["model_type"],
+    buckets=[0.01, 0.05, 0.1, 0.5, 1.0, 2.5, 5.0, float("inf")]
+)
+
 CELERY_TASK_FAILURES = Counter(
     "celery_task_failures_total",
     "Celery task hata sayısı",

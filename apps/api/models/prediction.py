@@ -14,11 +14,14 @@ import uuid
 from datetime import date, datetime
 from typing import Optional, Any
 
-from sqlalchemy import Float, String, Date, ForeignKey, Integer
+from sqlalchemy import Float, String, Date, ForeignKey, Integer, JSON
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from apps.api.models.base import Base, TimestampMixin
+
+# SQLite-compatible JSONB variant
+VariantJSON = JSON().with_variant(JSONB, "postgresql")
 
 
 class HarvestPrediction(TimestampMixin, Base):
@@ -98,8 +101,8 @@ class HarvestPrediction(TimestampMixin, Base):
         nullable=True,
         comment="Doküman 2.7: XGBoost+LSTM ensemble versiyonu",
     )
-    raw_features: Mapped[Optional[Any]] = mapped_column(
-        JSONB,
+    raw_features: Mapped[Optional[dict[str, Any]]] = mapped_column(
+        VariantJSON,
         nullable=True,
         comment="Modele verilen tüm feature değerleri (debug + kalibrasyon için)",
     )

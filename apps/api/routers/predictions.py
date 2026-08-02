@@ -24,7 +24,8 @@ from apps.api.models.prediction import HarvestPrediction
 from apps.api.models.user import User
 from apps.api.services.auth import get_current_user
 from apps.api.services.prediction import predict_harvest, predict_disease_risk
-from apps.api.services.metrics import HARVEST_PREDICTIONS_TOTAL
+from apps.api.services.metrics import HARVEST_PREDICTIONS_TOTAL, MODEL_INFERENCE_TIME
+import time
 
 router = APIRouter(tags=["predictions"])
 
@@ -116,23 +117,28 @@ def create_harvest_prediction(
 ):
     gh = _verify_greenhouse_owner(request.greenhouse_id, current_user, db)
 
-    prediction_result = predict_harvest(
-        crop_type=request.crop_type,
-        variety=request.variety,
-        avg_temperature_C=request.avg_temperature_C,
-        min_temperature_C=request.min_temperature_C,
-        max_temperature_C=request.max_temperature_C,
-        humidity_percent=request.humidity_percent,
-        co2_ppm=request.co2_ppm,
-        light_intensity_lux=request.light_intensity_lux,
-        photoperiod_hours=request.photoperiod_hours,
-        irrigation_mm=request.irrigation_mm,
-        fertilizer_N_kg_ha=request.fertilizer_N_kg_ha,
-        fertilizer_P_kg_ha=request.fertilizer_P_kg_ha,
-        fertilizer_K_kg_ha=request.fertilizer_K_kg_ha,
-        pest_severity=request.pest_severity,
-        soil_pH=request.soil_pH,
-    )
+    start_time = time.time()
+    try:
+        prediction_result = predict_harvest(
+            crop_type=request.crop_type,
+            variety=request.variety,
+            avg_temperature_C=request.avg_temperature_C,
+            min_temperature_C=request.min_temperature_C,
+            max_temperature_C=request.max_temperature_C,
+            humidity_percent=request.humidity_percent,
+            co2_ppm=request.co2_ppm,
+            light_intensity_lux=request.light_intensity_lux,
+            photoperiod_hours=request.photoperiod_hours,
+            irrigation_mm=request.irrigation_mm,
+            fertilizer_N_kg_ha=request.fertilizer_N_kg_ha,
+            fertilizer_P_kg_ha=request.fertilizer_P_kg_ha,
+            fertilizer_K_kg_ha=request.fertilizer_K_kg_ha,
+            pest_severity=request.pest_severity,
+            soil_pH=request.soil_pH,
+        )
+    finally:
+        inference_duration = time.time() - start_time
+        MODEL_INFERENCE_TIME.labels(model_type="harvest_xgboost").observe(inference_duration)
 
     pred = HarvestPrediction(
         greenhouse_id=gh.id,
@@ -151,13 +157,14 @@ def create_harvest_prediction(
     HARVEST_PREDICTIONS_TOTAL.inc()
 
     return HarvestPredictionResponse(
-        prediction_id=prediction.id,
-        greenhouse_id=prediction.greenhouse_id,
-        predicted_harvest_date=prediction.predicted_harvest_date,
-        predicted_days_remaining=prediction.predicted_days_remaining,
-        confidence_score=prediction.confidence_score,
-        model_version=prediction.model_version,
-        created_at=prediction.created_at,
+        prediction_id=pred.id,
+        greenhouse_id=pred.greenhouse_id,
+        predicted_harvest_date=pred.predicted_harvest_date,
+        predicted_days_remaining=pred.predicted_days_remaining,
+        predicted_yield_kg_m2=pred.predicted_yield_kg_m2,
+        confidence_score=pred.confidence_score,
+        model_version=pred.model_version,
+        created_at=pred.created_at,
     )
 
 
