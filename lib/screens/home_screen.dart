@@ -37,11 +37,13 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
             const Text(
               'Domates Analizi',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -139,6 +141,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-    );
+    )));
   }
 }
