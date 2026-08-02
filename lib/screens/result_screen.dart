@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
+import '../models/prediction_models.dart';
+import '../services/api_service.dart';
+import '../services/history_service.dart';
 
 class ResultScreen extends StatefulWidget {
   final Uint8List imageBytes;
@@ -12,6 +15,9 @@ class ResultScreen extends StatefulWidget {
 class _ResultScreenState extends State<ResultScreen> {
   bool _isLoading = true;
   List<Map<String, dynamic>> _results = [];
+  DiseaseRiskResponse? _diseaseRiskResult;
+  final ApiService _apiService = ApiService();
+  final HistoryService _historyService = HistoryService();
 
   @override
   void initState() {
@@ -28,6 +34,25 @@ class _ResultScreenState extends State<ResultScreen> {
         {'id': 3, 'olgunluk': 'not_ripe', 'hastalik': 'early_blight', 'skor': 0.88},
         {'id': 4, 'olgunluk': 'ripe', 'hastalik': 'healthy', 'skor': 0.97},
       ];
+    });
+
+    // Simulated disease_prob_from_vision (e.g., from average of scores or worst score)
+    double simulatedVisionProb = 0.88;
+
+    final request = DiseaseRiskRequest(
+      greenhouseId: ApiService.defaultGreenhouseId,
+      avgHumidityLast7d: 70.0,
+      avgTempLast7d: 25.0,
+      diseaseProbFromVision: simulatedVisionProb,
+    );
+
+    final riskResponse = await _apiService.predictDiseaseRisk(request);
+    
+    // Save to history
+    await _historyService.saveDiseaseResult(riskResponse);
+
+    setState(() {
+      _diseaseRiskResult = riskResponse;
       _isLoading = false;
     });
   }
@@ -117,6 +142,69 @@ class _ResultScreenState extends State<ResultScreen> {
                       );
                     },
                   ),
+                  if (_diseaseRiskResult != null) ...[
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Hastalık Riski Analizi (Sera)',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Card(
+                      color: _diseaseRiskResult!.riskLevel == 'high' 
+                          ? Colors.red[50] 
+                          : (_diseaseRiskResult!.riskLevel == 'medium' ? Colors.orange[50] : Colors.green[50]),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Risk Skoru:',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  '%${(_diseaseRiskResult!.riskScore * 100).toInt()}',
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Risk Seviyesi:',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  _diseaseRiskResult!.riskLevel.toUpperCase(),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: _diseaseRiskResult!.riskLevel == 'high' 
+                                        ? Colors.red 
+                                        : (_diseaseRiskResult!.riskLevel == 'medium' ? Colors.orange : Colors.green),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Divider(),
+                            const Text(
+                              'Öneri:',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(_diseaseRiskResult!.recommendation),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

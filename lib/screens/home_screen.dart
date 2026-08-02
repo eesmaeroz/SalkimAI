@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 import 'result_screen.dart';
+import 'prediction_screen.dart';
+import 'history_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -92,6 +94,44 @@ class _HomeScreenState extends State<HomeScreen> {
               label: const Text('Galeri'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green[400],
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 50),
+              ),
+            ),
+            const SizedBox(height: 32),
+            const Divider(),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const PredictionScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.auto_graph),
+              label: const Text('Tahminlemeler (Hasat & Risk)'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal[600],
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 50),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const HistoryScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.history),
+              label: const Text('Geçmiş İşlemler'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueGrey[600],
                 foregroundColor: Colors.white,
                 minimumSize: const Size(double.infinity, 50),
               ),
