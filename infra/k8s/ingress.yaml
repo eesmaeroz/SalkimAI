@@ -5,6 +5,8 @@ metadata:
   namespace: salkim
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Görüntü upload'ları için
+    cert-manager.io/cluster-issuer: "letsencrypt-prod" # Otomatik SSL/TLS sertifikası
+    nginx.ingress.kubernetes.io/limit-rps: "10" # Rate limiting: 10 request per second per IP
 spec:
   rules:
     - http:
@@ -16,3 +18,7 @@ spec:
                 name: salkim-api
                 port:
                   number: 80
+  tls:
+    - hosts:
+        - api.salkim.app
+      secretName: salkim-api-tls
