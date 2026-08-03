@@ -54,7 +54,8 @@ Sprint 3 için **backend'in production ortamına taşınması ve uçtan uca canl
 - Hasat tahmini (Tahminlemeler) ekranının Flutter tarafında UI entegrasyonu
 - Olgunluk (ripeness) modelinin güncellenmiş versiyonla değiştirilmesi
 
-### Devam Eden / Sprint 4'e Bırakılan Storyler
+### Bu Sprint'te Kapsam Dışı Bırakılan / Teslim Sonrası Öneri Niteliğindeki Storyler
+(Bu proje kapsamındaki son sprint olduğundan, aşağıdakiler tamamlanmamış ancak projenin olası devamı için not edilmiştir.)
 - Güncellenen olgunluk modelinin kapsamlı doğruluk testi
 - Hastalık modeli doğruluğunun iyileştirilmesi
 - Kullanıcı girişi (login) ekranı — gerçek kullanıcı auth akışı
