@@ -1,0 +1,46 @@
+# Sprint 3 Review — Salkım Projesi
+
+**Tarih:** 1 Ağustos 2026
+**Sprint Süresi:** 2 Hafta
+**Katılımcılar:** V1 (Esma), V2 (Dilan), T1 (Arif), T2 (Eren)
+
+---
+
+## Tamamlanan İşler
+
+### Backend Deployment (Esma - V1)
+- Backend, Railway üzerinde production ortamına taşındı
+- PostgreSQL, Redis, Celery worker ve MinIO servisleri kuruldu ve birbirine bağlandı
+- FastAPI ile Celery worker arasındaki dosya paylaşımı sorunu tespit edilip MinIO tabanlı bir mimariyle çözüldü
+- Kullanıcı kaydı, JWT ile giriş ve görüntü yükleme akışı uçtan uca canlı ortamda test edildi
+- Görüntü analiz pipeline'ı (YOLO tespit → EfficientNet olgunluk/hastalık sınıflandırma) canlıda doğrulandı
+- Flutter uygulaması mock veriden çıkarılıp gerçek Railway API'sine bağlandı
+
+### CV & Model İyileştirme (Dilan - V2)
+- Olgunluk modelinin yeşil domateslerde hatalı sınıflandırma yaptığı tespit edildi
+- Güncellenmiş olgunluk modeli (EfficientNet-B4, 3 sınıf) eğitildi ve production'a alındı
+- Yeni model gerçek fotoğraflarla doğrulandı
+
+### Mobil Uygulama — Tahminlemeler (Arif - T1)
+- Hasat tahmini (Tahminlemeler) ekranı tasarlandı ve geliştirildi
+- Sera ortam verisi giriş formu (sıcaklık, nem, CO2, ışık, sulama vb.) eklendi
+- Tahmin sonucu kartı (tahmini hasat tarihi, kalan gün, beklenen verim, model güven skoru) tamamlandı
+
+### Mobil Uygulama — Genel Akış (Eren - T2)
+- Geçmiş İşlemler ekranı ve navigasyon akışı geliştirildi
+- Sprint 3 boyunca UI testleri ve küçük düzeltmeler yapıldı
+- Sprint 3 GitHub Projects board'u güncellendi, dokümantasyon derlendi
+
+---
+
+## Tamamlanamayan / Kapsam Dışı Kalan İşler
+Bu proje kapsamındaki son sprint olduğu için aşağıdaki maddeler, projenin mevcut haliyle teslim edilmesi kararıyla kapsam dışı bırakılmış, olası bir devam çalışması için not edilmiştir:
+- Hastalık sınıflandırma modelinin doğruluğunun daha da iyileştirilmesi
+- Flutter'da gerçek kullanıcı girişi (login) ekranı — şu an sabit bir test kullanıcısı kullanılıyor
+- Geçmiş İşlemler ekranının backend'e bağlanması
+- Hasat tahmini ve hastalık riski endpoint'lerinin Flutter tarafında canlı API ile tam entegrasyonu
+
+---
+
+## Sprint Hedefi Değerlendirmesi
+Sprint 3'ün hedefi, önceki sprintlerde geliştirilen backend ve mobil uygulamayı gerçek bir production ortamına taşıyarak uçtan uca çalışan bir sistem ortaya koymaktı. Bu hedef başarıyla karşılandı: sistem artık herkesin erişebileceği bir adreste (`salkimai-production.up.railway.app`) çalışıyor, mobil uygulama gerçek fotoğraflarla domates tespiti, olgunluk ve hastalık sınıflandırması yapabiliyor. Proje, bu haliyle teslime hazırdır.
